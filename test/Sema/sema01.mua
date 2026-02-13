@@ -1,0 +1,64 @@
+function foo()
+  bar = 10
+end
+
+function bar()
+end
+
+function bar()
+end
+
+function baz(qux, qux)
+  1 + 1 = 1 + 1
+  foo(1)
+  qux()
+  mux()
+  return 0
+end
+
+-- RUN: not %muac -emit=sema %s 2>&1 | FileCheck %s
+
+--      CHECK:error: last statement of function foo must be a return statement
+-- CHECK-NEXT:{{.*}}sema01.mua:2:3-11
+-- CHECK-NEXT:  bar = 10
+-- CHECK-NEXT:  ^^^^^^^^
+-- CHECK-NEXT:error: function bar must end with a return statement
+-- CHECK-NEXT:{{.*}}sema01.mua:5:1-6:4
+-- CHECK-NEXT:function bar()
+-- CHECK-NEXT:^^^^^^^^^^^^^^
+-- CHECK-NEXT:error: redefinition of function bar
+-- CHECK-NEXT:{{.*}}sema01.mua:8:1-9:4
+-- CHECK-NEXT:function bar()
+-- CHECK-NEXT:^^^^^^^^^^^^^^
+-- CHECK-NEXT:note: previous definition is here
+-- CHECK-NEXT:{{.*}}sema01.mua:5:10-13
+-- CHECK-NEXT:function bar()
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: redefinition of parameter qux
+-- CHECK-NEXT:{{.*}}sema01.mua:11:19-22
+-- CHECK-NEXT:function baz(qux, qux)
+-- CHECK-NEXT:                  ^^^
+-- CHECK-NEXT:note: previous definition is here
+-- CHECK-NEXT:{{.*}}sema01.mua:11:14-17
+-- CHECK-NEXT:function baz(qux, qux)
+-- CHECK-NEXT:             ^^^
+-- CHECK-NEXT:error: expression is not assignable
+-- CHECK-NEXT:{{.*}}sema01.mua:12:3-8
+-- CHECK-NEXT:  1 + 1 = 1 + 1
+-- CHECK-NEXT:  ^^^^^
+-- CHECK-NEXT:error: call to function foo with incorrect number of arguments
+-- CHECK-NEXT:{{.*}}sema01.mua:13:3-9
+-- CHECK-NEXT:  foo(1)
+-- CHECK-NEXT:  ^^^^^^
+-- CHECK-NEXT:error: called object qux is not a function
+-- CHECK-NEXT:{{.*}}sema01.mua:14:3-8
+-- CHECK-NEXT:  qux()
+-- CHECK-NEXT:  ^^^^^
+-- CHECK-NEXT:note: previous definition is here
+-- CHECK-NEXT:{{.*}}sema01.mua:11:14-17
+-- CHECK-NEXT:function baz(qux, qux)
+-- CHECK-NEXT:             ^^^
+-- CHECK-NEXT:error: use of undeclared function mux
+-- CHECK-NEXT:{{.*}}sema01.mua:15:3-8
+-- CHECK-NEXT:  mux()
+-- CHECK-NEXT:  ^^^^^

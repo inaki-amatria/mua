@@ -1,0 +1,93 @@
+function foo(bar, baz)
+  qux = bar + baz
+  mux = qux * 2 - 3 / bar
+  return mux
+end
+
+function bar(baz)
+  qux = 1
+  mux = mux + 1
+  qux = qux * 1
+  mux = mux + 1
+  qux = qux * 1
+  mux = mux + 1
+  return qux
+end
+
+function baz()
+  10
+  qux = foo(5, 10)
+  mux = bar(5)
+  fux = qux + mux * qux / 2
+  return fux
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower00.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo(double %0, double %1) {
+--  CHECK-NEXT:  %bar = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %bar, align 8
+--  CHECK-NEXT:  %baz = alloca double, align 8
+--  CHECK-NEXT:  store double %1, ptr %baz, align 8
+--  CHECK-NEXT:  %qux = alloca double, align 8
+--  CHECK-NEXT:  %mux = alloca double, align 8
+--  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %3 = fadd double %bar1, %baz2
+--  CHECK-NEXT:  store double %3, ptr %qux, align 8
+--  CHECK-NEXT:  %qux3 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  %4 = fmul double %qux3, 2.000000e+00
+--  CHECK-NEXT:  %bar4 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %5 = fdiv double 3.000000e+00, %bar4
+--  CHECK-NEXT:  %6 = fsub double %4, %5
+--  CHECK-NEXT:  store double %6, ptr %mux, align 8
+--  CHECK-NEXT:  %mux5 = load double, ptr %mux, align 8
+--  CHECK-NEXT:  ret double %mux5
+--  CHECK-NEXT:}
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @bar(double %0) {
+--  CHECK-NEXT:  %baz = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %baz, align 8
+--  CHECK-NEXT:  %qux = alloca double, align 8
+--  CHECK-NEXT:  %mux = alloca double, align 8
+--  CHECK-NEXT:  store double 1.000000e+00, ptr %qux, align 8
+--  CHECK-NEXT:  %mux1 = load double, ptr %mux, align 8
+--  CHECK-NEXT:  %2 = fadd double %mux1, 1.000000e+00
+--  CHECK-NEXT:  store double %2, ptr %mux, align 8
+--  CHECK-NEXT:  %qux2 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  %3 = fmul double %qux2, 1.000000e+00
+--  CHECK-NEXT:  store double %3, ptr %qux, align 8
+--  CHECK-NEXT:  %mux3 = load double, ptr %mux, align 8
+--  CHECK-NEXT:  %4 = fadd double %mux3, 1.000000e+00
+--  CHECK-NEXT:  store double %4, ptr %mux, align 8
+--  CHECK-NEXT:  %qux4 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  %5 = fmul double %qux4, 1.000000e+00
+--  CHECK-NEXT:  store double %5, ptr %qux, align 8
+--  CHECK-NEXT:  %mux5 = load double, ptr %mux, align 8
+--  CHECK-NEXT:  %6 = fadd double %mux5, 1.000000e+00
+--  CHECK-NEXT:  store double %6, ptr %mux, align 8
+--  CHECK-NEXT:  %qux6 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  ret double %qux6
+--  CHECK-NEXT:}
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @baz() {
+--  CHECK-NEXT:  %qux = alloca double, align 8
+--  CHECK-NEXT:  %mux = alloca double, align 8
+--  CHECK-NEXT:  %fux = alloca double, align 8
+--  CHECK-NEXT:  %1 = call double @foo(double 5.000000e+00, double 1.000000e+01)
+--  CHECK-NEXT:  store double %1, ptr %qux, align 8
+--  CHECK-NEXT:  %2 = call double @bar(double 5.000000e+00)
+--  CHECK-NEXT:  store double %2, ptr %mux, align 8
+--  CHECK-NEXT:  %qux1 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  %mux2 = load double, ptr %mux, align 8
+--  CHECK-NEXT:  %qux3 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  %3 = fdiv double %qux3, 2.000000e+00
+--  CHECK-NEXT:  %4 = fmul double %mux2, %3
+--  CHECK-NEXT:  %5 = fadd double %qux1, %4
+--  CHECK-NEXT:  store double %5, ptr %fux, align 8
+--  CHECK-NEXT:  %fux4 = load double, ptr %fux, align 8
+--  CHECK-NEXT:  ret double %fux4
+--  CHECK-NEXT:}

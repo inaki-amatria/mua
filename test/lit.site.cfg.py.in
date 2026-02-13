@@ -1,0 +1,12 @@
+@LIT_SITE_CFG_IN_HEADER@
+
+import os
+import lit.llvm
+
+config.llvm_tools_dir = "@LLVM_TOOLS_DIR@"
+config.mua_source_dir = "@MUA_SOURCE_DIR@"
+config.mua_binary_test_dir = os.path.dirname(__file__)
+
+lit.llvm.initialize(lit_config, config)
+
+lit_config.load_config(config, os.path.join(config.mua_source_dir, 'test', 'lit.cfg.py'))

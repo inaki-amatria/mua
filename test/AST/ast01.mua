@@ -1,0 +1,55 @@
+function foo()
+  bar = 10
+end
+
+function bar()
+end
+
+function bar()
+end
+
+function baz(qux, qux)
+  1 + 1 = 1 + 1
+  foo(1)
+  qux()
+  mux()
+  return 0
+end
+
+-- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
+
+--      CHECK:TranslationUnit [{{.*}}ast01.mua:1:1-56:1]
+-- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast01.mua:1:1-3:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast01.mua:2:3-3:4]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast01.mua:2:3-11]
+-- CHECK-NEXT:        BinaryExpr = [{{.*}}ast01.mua:2:3-11]
+-- CHECK-NEXT:          IdentifierExpr bar [{{.*}}ast01.mua:2:3-6]
+-- CHECK-NEXT:          NumberExpr 1.000000e+01 [{{.*}}ast01.mua:2:9-11]
+-- CHECK-NEXT:  FunctionDecl bar [{{.*}}ast01.mua:5:1-6:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast01.mua:6:1-4]
+-- CHECK-NEXT:  FunctionDecl bar [{{.*}}ast01.mua:8:1-9:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast01.mua:9:1-4]
+-- CHECK-NEXT:  FunctionDecl baz [{{.*}}ast01.mua:11:1-17:4]
+-- CHECK-NEXT:    ParamDecl qux [{{.*}}ast01.mua:11:14-17]
+-- CHECK-NEXT:    ParamDecl qux [{{.*}}ast01.mua:11:19-22]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast01.mua:12:3-17:4]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast01.mua:12:3-16]
+-- CHECK-NEXT:        BinaryExpr = [{{.*}}ast01.mua:12:3-16]
+-- CHECK-NEXT:          BinaryExpr + [{{.*}}ast01.mua:12:3-8]
+-- CHECK-NEXT:            NumberExpr 1.000000e+00 [{{.*}}ast01.mua:12:3-4]
+-- CHECK-NEXT:            NumberExpr 1.000000e+00 [{{.*}}ast01.mua:12:7-8]
+-- CHECK-NEXT:          BinaryExpr + [{{.*}}ast01.mua:12:11-16]
+-- CHECK-NEXT:            NumberExpr 1.000000e+00 [{{.*}}ast01.mua:12:11-12]
+-- CHECK-NEXT:            NumberExpr 1.000000e+00 [{{.*}}ast01.mua:12:15-16]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast01.mua:13:3-9]
+-- CHECK-NEXT:        CallExpr [{{.*}}ast01.mua:13:3-9]
+-- CHECK-NEXT:          IdentifierExpr foo [{{.*}}ast01.mua:13:3-6]
+-- CHECK-NEXT:          NumberExpr 1.000000e+00 [{{.*}}ast01.mua:13:7-8]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast01.mua:14:3-8]
+-- CHECK-NEXT:        CallExpr [{{.*}}ast01.mua:14:3-8]
+-- CHECK-NEXT:          IdentifierExpr qux [{{.*}}ast01.mua:14:3-6]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast01.mua:15:3-8]
+-- CHECK-NEXT:        CallExpr [{{.*}}ast01.mua:15:3-8]
+-- CHECK-NEXT:          IdentifierExpr mux [{{.*}}ast01.mua:15:3-6]
+-- CHECK-NEXT:      ReturnStmt [{{.*}}ast01.mua:16:3-11]
+-- CHECK-NEXT:        NumberExpr 0.000000e+00 [{{.*}}ast01.mua:16:10-11]

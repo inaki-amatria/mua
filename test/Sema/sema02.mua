@@ -1,0 +1,10 @@
+function foo()
+  return x = 1
+end
+
+-- RUN: %muac -emit=sema %s 2>&1 | FileCheck %s
+
+--      CHECK:<<unnamed>> : Scope
+-- CHECK-NEXT:  foo : Function : {{.*}}sema02.mua:1:10-13
+-- CHECK-NEXT:    foo : Scope
+-- CHECK-NEXT:      x : Var : {{.*}}sema02.mua:2:10-11

@@ -1,0 +1,14 @@
+function foo()
+  return x = 1
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower01.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo() {
+--  CHECK-NEXT:  %x = alloca double, align 8
+--  CHECK-NEXT:  store double 1.000000e+00, ptr %x, align 8
+--  CHECK-NEXT:  ret double 1.000000e+00
+--  CHECK-NEXT:}
