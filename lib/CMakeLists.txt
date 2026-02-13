@@ -1,0 +1,5 @@
+add_subdirectory(AST)
+add_subdirectory(Lower)
+add_subdirectory(Parser)
+add_subdirectory(Sema)
+add_subdirectory(Source)
