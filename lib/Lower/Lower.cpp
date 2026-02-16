@@ -117,12 +117,12 @@ private:
     case ast::Node::Kind::CallExpr: {
       const auto &call{static_cast<const ast::CallExpr &>(expr)};
       const ast::IdentifierExpr *id{call.getCallee()};
-      llvm::Function *callee{Module->getFunction(id->getName())};
+      llvm::Function *function{Module->getFunction(id->getName())};
       std::vector<llvm::Value *> args;
       for (const ast::ExprPtr &arg : call.getArgs()) {
         args.push_back(lower(*arg));
       }
-      return IRBuilder.CreateCall(callee, args);
+      return IRBuilder.CreateCall(function, args);
     }
     case ast::Node::Kind::BinaryExpr: {
       const auto &bin{static_cast<const ast::BinaryExpr &>(expr)};
