@@ -43,8 +43,8 @@ File::File(std::unique_ptr<llvm::MemoryBuffer> buffer)
 std::unique_ptr<File> File::Open(llvm::StringRef filename,
                                  llvm::raw_ostream &os) {
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> buffer{
-      llvm::MemoryBuffer::getFile(filename, /*IsText=*/true,
-                                  /*RequiresNullTerminator=*/false)};
+      llvm::MemoryBuffer::getFileOrSTDIN(filename, /*IsText=*/true,
+                                         /*RequiresNullTerminator=*/false)};
   if (std::error_code ec{buffer.getError()}) {
     os << "error: could not open file " << filename << ": " << ec.message()
        << '\n';
