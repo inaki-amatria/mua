@@ -1,0 +1,9 @@
+function foo(bar)
+  return baz(bar
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected ) after call argument list
+--  CHECK-NEXT:{{.*}}parser09.mua:10:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

@@ -1,0 +1,8 @@
+function foo(17
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--      CHECK:error: expected identifier in function parameter list
+-- CHECK-NEXT:{{.*}}parser03.mua:1:14-16
+-- CHECK-NEXT:function foo(17
+-- CHECK-NEXT:             ^^

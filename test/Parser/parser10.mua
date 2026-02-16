@@ -1,0 +1,9 @@
+function foo(bar)
+  bar = end
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--      CHECK:error: expected expression in the right-hand side of a binary expression
+-- CHECK-NEXT:{{.*}}parser10.mua:2:9-12
+-- CHECK-NEXT:  bar = end
+-- CHECK-NEXT:        ^^^

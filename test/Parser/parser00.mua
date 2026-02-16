@@ -1,0 +1,8 @@
+foo = 10
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--      CHECK:error: expected function at top level
+-- CHECK-NEXT:{{.*}}parser00.mua:1:1-4
+-- CHECK-NEXT:foo = 10
+-- CHECK-NEXT:^^^

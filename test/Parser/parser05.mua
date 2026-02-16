@@ -1,0 +1,9 @@
+function foo(bar)
+  return
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected expression after return
+--  CHECK-NEXT:{{.*}}parser05.mua:10:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

@@ -1,0 +1,8 @@
+function
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected identifier after function
+--  CHECK-NEXT:{{.*}}parser01.mua:9:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

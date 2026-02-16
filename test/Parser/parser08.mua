@@ -1,0 +1,9 @@
+function foo(bar)
+  return baz(end
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--      CHECK:error: expected expression in call argument list
+-- CHECK-NEXT:{{.*}}parser08.mua:2:14-17
+-- CHECK-NEXT:  return baz(end
+-- CHECK-NEXT:             ^^^

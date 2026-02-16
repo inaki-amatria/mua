@@ -1,0 +1,8 @@
+function foo(bar
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected ) after function parameter list
+--  CHECK-NEXT:{{.*}}parser04.mua:9:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^
