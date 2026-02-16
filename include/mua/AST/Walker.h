@@ -114,7 +114,6 @@ private:
 
   void walkChildren(const CallExpr &call) {
     if (TheVisitor.onEnter(call)) {
-      walk(*call.getCallee());
       for (const ExprPtr &arg : call.getArgs()) {
         walk(*arg);
       }

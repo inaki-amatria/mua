@@ -188,11 +188,10 @@ private:
 
   ast::ExprPtr parseIdentifierOrCallExpr() {
     source::Text name{TheLexer.getRange()};
-    auto id{std::make_unique<ast::IdentifierExpr>(name)};
     TheLexer.consume(Token::Identifier);
 
     if (TheLexer.getCurrent() != Token::LParen) {
-      return id;
+      return std::make_unique<ast::IdentifierExpr>(name);
     }
     TheLexer.consume(Token::LParen);
 
@@ -217,8 +216,7 @@ private:
     TheLexer.consume(Token::RParen);
 
     return std::make_unique<ast::CallExpr>(
-        std::move(id), std::move(args),
-        source::Range{name.getRange().getBegin(), end});
+        name, std::move(args), source::Range{name.getRange().getBegin(), end});
   }
 
   ast::ExprPtr parseBinaryExpr(int minPrec, llvm::StringRef context) {

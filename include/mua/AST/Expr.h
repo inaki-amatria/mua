@@ -71,22 +71,18 @@ private:
   source::Text Name;
 };
 
-using IdentifierExprPtr = std::unique_ptr<IdentifierExpr>;
-
 /// Expression representing a function call
 struct CallExpr final : public Expr {
-  CallExpr(IdentifierExprPtr callee, std::vector<ExprPtr> args,
-           source::Range range)
-      : Expr{Kind::CallExpr, range}, Callee{std::move(callee)},
-        Args{std::move(args)} {}
+  CallExpr(source::Text callee, std::vector<ExprPtr> args, source::Range range)
+      : Expr{Kind::CallExpr, range}, Callee{callee}, Args{std::move(args)} {}
 
-  const IdentifierExpr *getCallee() const { return Callee.get(); }
+  source::Text getCallee() const { return Callee; }
   llvm::ArrayRef<ExprPtr> getArgs() const { return Args; }
 
   static bool classof(const Node *n) { return n->getKind() == Kind::CallExpr; }
 
 private:
-  IdentifierExprPtr Callee;
+  source::Text Callee;
   std::vector<ExprPtr> Args;
 };
 

@@ -50,7 +50,7 @@ struct DumpVisitor final {
 
   bool onEnter(const CallExpr &call) {
     printIndent();
-    OS << "CallExpr [" << call.getRange() << "]\n";
+    OS << "CallExpr " << call.getCallee() << " [" << call.getRange() << "]\n";
     ++Level;
     return true;
   }

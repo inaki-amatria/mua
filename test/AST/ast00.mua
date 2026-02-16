@@ -24,7 +24,7 @@ end
 
 -- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
 
---      CHECK:TranslationUnit [{{.*}}ast00.mua:1:1-118:1]
+--      CHECK:TranslationUnit [{{.*}}ast00.mua:1:1-116:1]
 -- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast00.mua:1:1-5:4]
 -- CHECK-NEXT:    ParamDecl bar [{{.*}}ast00.mua:1:14-17]
 -- CHECK-NEXT:    ParamDecl baz [{{.*}}ast00.mua:1:19-22]
@@ -93,15 +93,13 @@ end
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast00.mua:19:3-19]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast00.mua:19:3-19]
 -- CHECK-NEXT:          IdentifierExpr qux [{{.*}}ast00.mua:19:3-6]
--- CHECK-NEXT:          CallExpr [{{.*}}ast00.mua:19:9-19]
--- CHECK-NEXT:            IdentifierExpr foo [{{.*}}ast00.mua:19:9-12]
+-- CHECK-NEXT:          CallExpr foo [{{.*}}ast00.mua:19:9-19]
 -- CHECK-NEXT:            NumberExpr 5.000000e+00 [{{.*}}ast00.mua:19:13-14]
 -- CHECK-NEXT:            NumberExpr 1.000000e+01 [{{.*}}ast00.mua:19:16-18]
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast00.mua:20:3-15]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast00.mua:20:3-15]
 -- CHECK-NEXT:          IdentifierExpr mux [{{.*}}ast00.mua:20:3-6]
--- CHECK-NEXT:          CallExpr [{{.*}}ast00.mua:20:9-15]
--- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast00.mua:20:9-12]
+-- CHECK-NEXT:          CallExpr bar [{{.*}}ast00.mua:20:9-15]
 -- CHECK-NEXT:            NumberExpr 5.000000e+00 [{{.*}}ast00.mua:20:13-14]
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast00.mua:21:3-28]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast00.mua:21:3-28]

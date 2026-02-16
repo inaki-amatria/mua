@@ -116,8 +116,7 @@ private:
     }
     case ast::Node::Kind::CallExpr: {
       const auto &call{static_cast<const ast::CallExpr &>(expr)};
-      const ast::IdentifierExpr *id{call.getCallee()};
-      llvm::Function *function{Module->getFunction(id->getName())};
+      llvm::Function *function{Module->getFunction(call.getCallee())};
       std::vector<llvm::Value *> args;
       for (const ast::ExprPtr &arg : call.getArgs()) {
         args.push_back(lower(*arg));
