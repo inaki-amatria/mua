@@ -48,19 +48,19 @@ struct AnalyzerVisitor final {
 
   bool onEnter(const ast::CallExpr &call) {
     const ast::IdentifierExpr *id{call.getCallee()};
-    const Symbol *callee{CurrentScope->lookup(id->getName())};
-    if (!callee) {
+    const Symbol *symbol{CurrentScope->lookup(id->getName())};
+    if (!symbol) {
       error(call.getRange(), "use of undeclared function " + id->getName());
       return false;
     }
-    if (callee->getKind() != Symbol::Kind::Function) {
+    if (symbol->getKind() != Symbol::Kind::Function) {
       error(call.getRange(),
             "called object " + id->getName() + " is not a function");
-      note(callee->getName().getRange(), "previous definition is here");
+      note(symbol->getName().getRange(), "previous definition is here");
       return false;
     }
     if (call.getArgs().size() !=
-        callee->getScope()->getSymbols(Symbol::Kind::Param).size()) {
+        symbol->getScope()->getSymbols(Symbol::Kind::Param).size()) {
       error(call.getRange(), "call to function " + id->getName() +
                                  " with incorrect number of arguments");
       return false;
