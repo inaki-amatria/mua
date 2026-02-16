@@ -99,12 +99,12 @@ void File::print(Range range, llvm::raw_ostream &os) const {
   Position end{range.getEnd()};
 
   unsigned column{getLineAndColumn(begin).second};
-  llvm::StringRef lineText{getLineAt(begin)};
+  llvm::StringRef line{getLineAt(begin)};
 
-  os << range << '\n' << lineText << '\n';
+  os << range << '\n' << line << '\n';
 
   unsigned rawLen{static_cast<unsigned>(end.getOffset() - begin.getOffset())};
-  unsigned maxLen{static_cast<unsigned>(lineText.size() - column)};
+  unsigned maxLen{static_cast<unsigned>(line.size() - column)};
   unsigned len{rawLen ? std::min(rawLen, maxLen) : 1};
 
   os.indent(column) << std::string(len ? len : 1, '^');
