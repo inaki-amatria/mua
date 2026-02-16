@@ -101,16 +101,16 @@ struct Scope final {
   /// Symbols of that Kind are returned. The result is sorted by source position
   std::vector<const Symbol *>
   getSymbols(std::optional<Symbol::Kind> kind = std::nullopt) const {
-    std::vector<const Symbol *> params;
+    std::vector<const Symbol *> symbols;
     for (const auto &pair : Symbols) {
       if (!kind || pair.second.getKind() == *kind) {
-        params.push_back(&pair.second);
+        symbols.push_back(&pair.second);
       }
     }
-    llvm::sort(params, [](const Symbol *lhs, const Symbol *rhs) {
+    llvm::sort(symbols, [](const Symbol *lhs, const Symbol *rhs) {
       return lhs->getName().getRange() < rhs->getName().getRange();
     });
-    return params;
+    return symbols;
   }
 
   Scope *getParent() { return Parent; }
