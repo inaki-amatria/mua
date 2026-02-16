@@ -129,9 +129,9 @@ private:
       if (bin.getOp() == ast::BinaryExpr::Op::Assign) {
         const auto &id{static_cast<const ast::IdentifierExpr &>(*bin.getLHS())};
         const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
+        llvm::Value *lhs{SymbolToValue.at(symbol)};
         llvm::Value *rhs{lower(*bin.getRHS())};
-        llvm::Value *addr{SymbolToValue.at(symbol)};
-        IRBuilder.CreateStore(rhs, addr);
+        IRBuilder.CreateStore(rhs, lhs);
         return rhs;
       }
       llvm::Value *lhs{lower(*bin.getLHS())};
