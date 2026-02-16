@@ -1,0 +1,54 @@
+function foo(bar)
+  return 0
+end
+
+function bar()
+  foo(bar)
+  foo = 10
+  baz = bar
+  foo
+  return foo
+end
+
+-- RUN: not %muac -emit=sema %s 2>&1 | FileCheck %s
+
+--      CHECK:error: invalid use of function bar
+-- CHECK-NEXT:{{.*}}sema03.mua:6:7-10
+-- CHECK-NEXT:  foo(bar)
+-- CHECK-NEXT:      ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema03.mua:5:10-13
+-- CHECK-NEXT:function bar()
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: invalid use of function foo
+-- CHECK-NEXT:{{.*}}sema03.mua:7:3-6
+-- CHECK-NEXT:  foo = 10
+-- CHECK-NEXT:  ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema03.mua:1:10-13
+-- CHECK-NEXT:function foo(bar)
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: invalid use of function bar
+-- CHECK-NEXT:{{.*}}sema03.mua:8:9-12
+-- CHECK-NEXT:  baz = bar
+-- CHECK-NEXT:        ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema03.mua:5:10-13
+-- CHECK-NEXT:function bar()
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: invalid use of function foo
+-- CHECK-NEXT:{{.*}}sema03.mua:9:3-6
+-- CHECK-NEXT:  foo
+-- CHECK-NEXT:  ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema03.mua:1:10-13
+-- CHECK-NEXT:function foo(bar)
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: invalid use of function foo
+-- CHECK-NEXT:{{.*}}sema03.mua:10:10-13
+-- CHECK-NEXT:  return foo
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema03.mua:1:10-13
+-- CHECK-NEXT:function foo(bar)
+-- CHECK-NEXT:         ^^^

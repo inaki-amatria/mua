@@ -25,7 +25,6 @@
 #include "mua/AST/Walker.h"
 #include "mua/Sema/Symbol.h"
 #include "mua/Source/File.h"
-#include "mua/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
 using namespace mua;
@@ -64,26 +63,28 @@ struct AnalyzerVisitor final {
                                  " with incorrect number of arguments");
       return false;
     }
-    return true;
+    return llvm::all_of(call.getArgs(), [&](const ast::ExprPtr &arg) {
+      return checkValueExpr(*arg);
+    });
   }
 
   bool onEnter(const ast::BinaryExpr &bin) {
-    switch (bin.getOp()) {
-    case ast::BinaryExpr::Op::Assign: {
+    if (bin.getOp() == ast::BinaryExpr::Op::Assign) {
       const auto *id{llvm::dyn_cast<ast::IdentifierExpr>(bin.getLHS())};
       if (!id) {
         error(bin.getLHS()->getRange(), "expression is not assignable");
         return false;
       }
-      return true;
     }
-    case ast::BinaryExpr::Op::Add:
-    case ast::BinaryExpr::Op::Sub:
-    case ast::BinaryExpr::Op::Mul:
-    case ast::BinaryExpr::Op::Div:
-      return true;
-    }
-    MUA_COVERS_ALL_CASES;
+    return checkValueExpr(*bin.getLHS()) && checkValueExpr(*bin.getRHS());
+  }
+
+  bool onEnter(const ast::ExprStmt &es) {
+    return checkValueExpr(*es.getExpr());
+  }
+
+  bool onEnter(const ast::ReturnStmt &rs) {
+    return checkValueExpr(*rs.getValue());
   }
 
   bool onEnter(const ast::ParamDecl &pd) {
@@ -127,6 +128,20 @@ struct AnalyzerVisitor final {
   }
 
 private:
+  bool checkValueExpr(const ast::Expr &expr) {
+    const auto *id{llvm::dyn_cast<ast::IdentifierExpr>(&expr)};
+    if (!id) {
+      return true;
+    }
+    const Symbol *symbol{CurrentScope->lookup(id->getName())};
+    if (!symbol || symbol->getKind() != Symbol::Kind::Function) {
+      return true;
+    }
+    error(id->getRange(), "invalid use of function " + id->getName());
+    note(symbol->getName().getRange(), "function declared here");
+    return false;
+  }
+
   void error(source::Range range, llvm::Twine message) {
     OS << "error: " << message << '\n';
     range.getFile()->print(range, OS);
