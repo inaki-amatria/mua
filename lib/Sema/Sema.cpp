@@ -71,7 +71,7 @@ struct AnalyzerVisitor final {
   bool onEnter(const ast::BinaryExpr &bin) {
     switch (bin.getOp()) {
     case ast::BinaryExpr::Op::Assign: {
-      auto *id{llvm::dyn_cast<ast::IdentifierExpr>(bin.getLHS())};
+      const auto *id{llvm::dyn_cast<ast::IdentifierExpr>(bin.getLHS())};
       if (!id) {
         error(bin.getLHS()->getRange(), "expression is not assignable");
         return false;
