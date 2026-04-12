@@ -28,8 +28,7 @@
 namespace mua::ast {
 
 /// Represents a complete TranslationUnit
-class TranslationUnit final : public Node {
-public:
+struct TranslationUnit final : public Node {
   TranslationUnit(std::vector<FunctionDeclPtr> fns, source::Range range)
       : Node{Kind::TranslationUnit, range}, FNs{std::move(fns)} {}
 

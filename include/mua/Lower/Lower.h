@@ -28,7 +28,7 @@ class raw_ostream;
 } // namespace llvm
 
 namespace mua::ast {
-class TranslationUnit;
+struct TranslationUnit;
 } // namespace mua::ast
 
 namespace mua::sema {
