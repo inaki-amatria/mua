@@ -28,8 +28,7 @@
 namespace mua::ast {
 
 /// Base class for all Nodes
-class Node {
-public:
+struct Node {
   enum class Kind {
     // Expressions
     FirstExpr,
