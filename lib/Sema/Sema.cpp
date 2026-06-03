@@ -111,14 +111,8 @@ struct AnalyzerVisitor final {
   }
 
   void onExit(const ast::FunctionDecl &fn) {
-    llvm::ArrayRef<ast::StmtPtr> stmts{fn.getBody()->getStmts()};
-    if (stmts.empty()) {
-      error(fn.getRange(),
-            "function " + fn.getName() + " must end with a return statement");
-    } else if (!llvm::isa<ast::ReturnStmt>(stmts.back().get())) {
-      error(stmts.back()->getRange(), "last statement of function " +
-                                          fn.getName() +
-                                          " must be a return statement");
+    if (!checkReturnStmt(*fn.getBody())) {
+      error(fn.getRange(), "function " + fn.getName() + " must return a value");
     }
     CurrentScope = CurrentScope->getParent();
   }
@@ -140,6 +134,20 @@ private:
     error(id->getRange(), "invalid use of function " + id->getName());
     note(symbol->getName().getRange(), "function declared here");
     return false;
+  }
+
+  bool checkReturnStmt(const ast::CompoundStmt &cs) {
+    bool sawReturn{false};
+    for (const ast::StmtPtr &stmt : cs.getStmts()) {
+      if (sawReturn) {
+        error(stmt->getRange(), "unreachable statement after return");
+        continue;
+      }
+      if (llvm::isa<ast::ReturnStmt>(stmt.get())) {
+        sawReturn = true;
+      }
+    }
+    return sawReturn;
   }
 
   void error(source::Range range, llvm::Twine message) {
