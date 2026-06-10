@@ -87,6 +87,12 @@ struct AnalyzerVisitor final {
     return checkValueExpr(*rs.getValue());
   }
 
+  bool onEnter(const ast::IfStmt &is) {
+    return checkValueExpr(*is.getCondition());
+  }
+
+  void onExit(const ast::IfStmt &is) { checkReturnStmt(*is.getBody()); }
+
   bool onEnter(const ast::ParamDecl &pd) {
     auto [symbol,
           declared]{CurrentScope->declare(Symbol::Kind::Param, pd.getName())};
