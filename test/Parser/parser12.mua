@@ -1,0 +1,9 @@
+function foo()
+  if bar
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected then after condition
+--  CHECK-NEXT:{{.*}}parser12.mua:10:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

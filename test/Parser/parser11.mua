@@ -1,0 +1,10 @@
+function foo()
+  if then
+end
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--      CHECK:error: expected expression after if
+-- CHECK-NEXT:{{.*}}parser11.mua:2:6-10
+-- CHECK-NEXT:  if then
+-- CHECK-NEXT:     ^^^^

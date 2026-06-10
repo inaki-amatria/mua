@@ -81,6 +81,8 @@ struct BinaryExprOp final {
     case Token::Function:
     case Token::Return:
     case Token::End:
+    case Token::If:
+    case Token::Then:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -163,6 +165,8 @@ private:
     case Token::Function:
     case Token::Return:
     case Token::End:
+    case Token::If:
+    case Token::Then:
     case Token::Equal:
     case Token::Comma:
     case Token::LParen:
@@ -257,12 +261,15 @@ private:
     switch (TheLexer.getCurrent()) {
     case Token::Return:
       return parseReturnStmt();
+    case Token::If:
+      return parseIfStmt();
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
     case Token::Number:
     case Token::Function:
     case Token::End:
+    case Token::Then:
     case Token::Equal:
     case Token::Comma:
     case Token::LParen:
@@ -314,6 +321,30 @@ private:
 
     return std::make_unique<ast::CompoundStmt>(std::move(stmts),
                                                source::Range{begin, end});
+  }
+
+  ast::StmtPtr parseIfStmt() {
+    source::Position begin{TheLexer.getRange().getBegin()};
+    TheLexer.consume(Token::If);
+
+    ast::ExprPtr condition{parseExpr("after if")};
+    if (!condition) {
+      return nullptr;
+    }
+
+    if (TheLexer.getCurrent() != Token::Then) {
+      return error<ast::IfStmt>(Token::Then, "after condition");
+    }
+    TheLexer.consume(Token::Then);
+
+    ast::CompoundStmtPtr body{parseCompoundStmt("in if body")};
+    if (!body) {
+      return nullptr;
+    }
+    source::Position end{body->getRange().getEnd()};
+
+    return std::make_unique<ast::IfStmt>(std::move(condition), std::move(body),
+                                         source::Range{begin, end});
   }
 
   ast::FunctionDeclPtr parseFunctionDecl(llvm::StringRef context) {
