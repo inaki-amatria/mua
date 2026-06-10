@@ -54,6 +54,30 @@ struct LowerToLLVMIRVisitor final {
     return true;
   }
 
+  bool onEnter(const ast::IfStmt &is) {
+    llvm::Value *condition{lower(*is.getCondition())};
+    llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
+    llvm::BasicBlock *thenBB{
+        llvm::BasicBlock::Create(*LLVMContext, "if.then", function)};
+    llvm::BasicBlock *mergeBB{
+        llvm::BasicBlock::Create(*LLVMContext, "if.end", function)};
+    llvm::Value *fCmpONE{IRBuilder.CreateFCmpONE(
+        condition, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0))};
+    IRBuilder.CreateCondBr(fCmpONE, thenBB, mergeBB);
+    IRBuilder.SetInsertPoint(thenBB);
+    MergeBBStack.push_back(mergeBB);
+    return true;
+  }
+
+  void onExit(const ast::IfStmt &) {
+    llvm::BasicBlock *mergeBB{MergeBBStack.back()};
+    if (!IRBuilder.GetInsertBlock()->hasTerminator()) {
+      IRBuilder.CreateBr(mergeBB);
+    }
+    IRBuilder.SetInsertPoint(mergeBB);
+    MergeBBStack.pop_back();
+  }
+
   bool onEnter(const ast::FunctionDecl &fn) {
     const sema::Symbol *symbol{CurrentScope->lookup(fn.getName())};
     const sema::Scope *scope{symbol->getScope()};
@@ -168,6 +192,8 @@ private:
 
   llvm::IRBuilder<> IRBuilder;
   llvm::DenseMap<const sema::Symbol *, llvm::Value *> SymbolToValue;
+
+  std::vector<llvm::BasicBlock *> MergeBBStack;
 };
 
 } // namespace
