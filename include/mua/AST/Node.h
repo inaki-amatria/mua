@@ -43,7 +43,8 @@ struct Node {
     ExprStmt = FirstStmt,
     ReturnStmt,
     CompoundStmt,
-    LastStmt = CompoundStmt,
+    IfStmt,
+    LastStmt = IfStmt,
 
     // Declarations
     FirstDecl,

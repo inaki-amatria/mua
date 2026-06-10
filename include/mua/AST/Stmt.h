@@ -85,6 +85,22 @@ private:
 
 using CompoundStmtPtr = std::unique_ptr<CompoundStmt>;
 
+/// Statement representing an if
+struct IfStmt final : public Stmt {
+  IfStmt(ExprPtr condition, CompoundStmtPtr body, source::Range range)
+      : Stmt{Kind::IfStmt, range}, Condition{std::move(condition)},
+        Body{std::move(body)} {}
+
+  const Expr *getCondition() const { return Condition.get(); }
+  const CompoundStmt *getBody() const { return Body.get(); }
+
+  static bool classof(const Node *n) { return n->getKind() == Kind::IfStmt; }
+
+private:
+  ExprPtr Condition;
+  CompoundStmtPtr Body;
+};
+
 } // namespace mua::ast
 
 #endif // MUA_AST_STMT_H

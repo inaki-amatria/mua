@@ -75,6 +75,9 @@ template <typename Visitor> struct Walker final {
     case Node::Kind::CompoundStmt:
       walkChildren(static_cast<const CompoundStmt &>(n));
       break;
+    case Node::Kind::IfStmt:
+      walkChildren(static_cast<const IfStmt &>(n));
+      break;
     case Node::Kind::ParamDecl:
       walkChildren(static_cast<const ParamDecl &>(n));
       break;
@@ -149,6 +152,14 @@ private:
         walk(*stmt);
       }
       TheVisitor.onExit(cs);
+    }
+  }
+
+  void walkChildren(const IfStmt &is) {
+    if (TheVisitor.onEnter(is)) {
+      walk(*is.getCondition());
+      walk(*is.getBody());
+      TheVisitor.onExit(is);
     }
   }
 

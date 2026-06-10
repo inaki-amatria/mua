@@ -93,6 +93,15 @@ struct DumpVisitor final {
 
   void onExit(const CompoundStmt &) { --Level; }
 
+  bool onEnter(const IfStmt &is) {
+    printIndent();
+    OS << "IfStmt [" << is.getRange() << "]\n";
+    ++Level;
+    return true;
+  }
+
+  void onExit(const IfStmt &) { --Level; }
+
   bool onEnter(const ParamDecl &pd) {
     printIndent();
     OS << "ParamDecl " << pd.getName() << " [" << pd.getRange() << "]\n";
