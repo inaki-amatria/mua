@@ -181,6 +181,27 @@ private:
         IRBuilder.CreateStore(rhs, lhs);
         return rhs;
       }
+      if (bin.getOp() == ast::BinaryExpr::Op::And ||
+          bin.getOp() == ast::BinaryExpr::Op::Or) {
+        bool isAnd{bin.getOp() == ast::BinaryExpr::Op::And};
+        llvm::Value *lhs{lower(*bin.getLHS())};
+        llvm::BasicBlock *condBB{IRBuilder.GetInsertBlock()};
+        llvm::Function *fn{condBB->getParent()};
+        llvm::BasicBlock *rhsBB{llvm::BasicBlock::Create(
+            *LLVMContext, isAnd ? "and.rhs" : "or.rhs", fn)};
+        llvm::BasicBlock *endBB{llvm::BasicBlock::Create(
+            *LLVMContext, isAnd ? "and.end" : "or.end", fn)};
+        IRBuilder.CreateCondBr(isTruthy(lhs), isAnd ? rhsBB : endBB,
+                               isAnd ? endBB : rhsBB);
+        IRBuilder.SetInsertPoint(rhsBB);
+        llvm::Value *rhs{lower(*bin.getRHS())};
+        IRBuilder.CreateBr(endBB);
+        IRBuilder.SetInsertPoint(endBB);
+        llvm::PHINode *phi{IRBuilder.CreatePHI(IRBuilder.getDoubleTy(), 2)};
+        phi->addIncoming(lhs, condBB);
+        phi->addIncoming(rhs, rhsBB);
+        return phi;
+      }
       llvm::Value *lhs{lower(*bin.getLHS())};
       llvm::Value *rhs{lower(*bin.getRHS())};
       switch (bin.getOp()) {
@@ -216,8 +237,13 @@ private:
       switch (ue.getOp()) {
       case mua::ast::UnaryExpr::Op::Neg:
         return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
-      case mua::ast::UnaryExpr::Op::Not:
-        break;
+      case mua::ast::UnaryExpr::Op::Not: {
+        llvm::Value *operand{lower(*ue.getOperand())};
+        return IRBuilder.CreateSelect(
+            isTruthy(operand),
+            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0),
+            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0));
+      }
       }
       MUA_COVERS_ALL_CASES;
     }

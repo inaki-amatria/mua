@@ -1,0 +1,36 @@
+function foo(bar, baz)
+  if bar and baz then
+    return 1
+  end
+  return 0
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower05.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo(double %0, double %1) {
+--  CHECK-NEXT:  %bar = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %bar, align 8
+--  CHECK-NEXT:  %baz = alloca double, align 8
+--  CHECK-NEXT:  store double %1, ptr %baz, align 8
+--  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %3 = fcmp one double %bar1, 0.000000e+00
+--  CHECK-NEXT:  br i1 %3, label %and.rhs, label %and.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:and.rhs:
+--  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  br label %and.end
+--  CHECK-EMPTY:
+--  CHECK-NEXT:and.end:
+--  CHECK-NEXT:  %4 = phi double [ %bar1, %2 ], [ %baz2, %and.rhs ]
+--  CHECK-NEXT:  %5 = fcmp one double %4, 0.000000e+00
+--  CHECK-NEXT:  br i1 %5, label %if.then, label %if.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.then:
+--  CHECK-NEXT:  ret double 1.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.end:
+--  CHECK-NEXT:  ret double 0.000000e+00
+--  CHECK-NEXT:}
