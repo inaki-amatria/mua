@@ -95,8 +95,6 @@ struct AnalyzerVisitor final {
     return checkValueExpr(*is.getCondition());
   }
 
-  void onExit(const ast::IfStmt &is) { checkReturnStmt(*is.getIfBody()); }
-
   bool onEnter(const ast::ParamDecl &pd) {
     auto [symbol,
           declared]{CurrentScope->declare(Symbol::Kind::Param, pd.getName())};
@@ -146,6 +144,8 @@ private:
     return false;
   }
 
+  /// Check the given CompoundStmt for unreachable code after return-like
+  /// statements. Returns true if the last statement is terminal
   bool checkReturnStmt(const ast::CompoundStmt &cs) {
     bool sawReturn{false};
     for (const ast::StmtPtr &stmt : cs.getStmts()) {
@@ -155,6 +155,15 @@ private:
       }
       if (llvm::isa<ast::ReturnStmt>(stmt.get())) {
         sawReturn = true;
+      }
+      if (const auto *is{llvm::dyn_cast<ast::IfStmt>(stmt.get())}) {
+        bool bodyReturns{checkReturnStmt(*is->getIfBody())};
+        if (const ast::CompoundStmt *elseBody{is->getElseBody()}) {
+          bool elseReturns{checkReturnStmt(*elseBody)};
+          if (bodyReturns && elseReturns) {
+            sawReturn = true;
+          }
+        }
       }
     }
     return sawReturn;
