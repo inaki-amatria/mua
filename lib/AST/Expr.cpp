@@ -53,6 +53,10 @@ llvm::raw_ostream &mua::ast::operator<<(llvm::raw_ostream &os,
     return os << '<';
   case BinaryExpr::Op::Gt:
     return os << '>';
+  case BinaryExpr::Op::And:
+    return os << "and";
+  case BinaryExpr::Op::Or:
+    return os << "or";
   }
   MUA_COVERS_ALL_CASES;
 }
@@ -62,6 +66,8 @@ llvm::raw_ostream &mua::ast::operator<<(llvm::raw_ostream &os,
   switch (op) {
   case UnaryExpr::Op::Neg:
     return os << '-';
+  case UnaryExpr::Op::Not:
+    return os << "not";
   }
   MUA_COVERS_ALL_CASES;
 }

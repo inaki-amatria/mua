@@ -32,6 +32,16 @@
 using namespace mua;
 using namespace mua::parser;
 
+static Token ToToken(ast::UnaryExpr::Op op) {
+  switch (op) {
+  case ast::UnaryExpr::Op::Neg:
+    return Token::Minus;
+  case ast::UnaryExpr::Op::Not:
+    return Token::Not;
+  }
+  MUA_COVERS_ALL_CASES;
+}
+
 namespace {
 
 struct Expected final {
@@ -87,7 +97,9 @@ struct BinaryExprOp final {
     case Token::GreaterThan:
       return BinaryExprOp{ast::BinaryExpr::Op::Gt};
     case Token::And:
+      return BinaryExprOp{ast::BinaryExpr::Op::And};
     case Token::Or:
+      return BinaryExprOp{ast::BinaryExpr::Op::Or};
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
@@ -112,19 +124,23 @@ struct BinaryExprOp final {
     switch (Op) {
     case ast::BinaryExpr::Op::Assign:
       return 10;
+    case ast::BinaryExpr::Op::Or:
+      return 20;
+    case ast::BinaryExpr::Op::And:
+      return 30;
     case ast::BinaryExpr::Op::Eq:
     case ast::BinaryExpr::Op::NotEq:
     case ast::BinaryExpr::Op::Le:
     case ast::BinaryExpr::Op::Ge:
     case ast::BinaryExpr::Op::Lt:
     case ast::BinaryExpr::Op::Gt:
-      return 20;
+      return 40;
     case ast::BinaryExpr::Op::Add:
     case ast::BinaryExpr::Op::Sub:
-      return 30;
+      return 50;
     case ast::BinaryExpr::Op::Mul:
     case ast::BinaryExpr::Op::Div:
-      return 40;
+      return 60;
     }
     MUA_COVERS_ALL_CASES;
   }
@@ -133,6 +149,8 @@ struct BinaryExprOp final {
     switch (Op) {
     case ast::BinaryExpr::Op::Assign:
       return true;
+    case ast::BinaryExpr::Op::And:
+    case ast::BinaryExpr::Op::Or:
     case ast::BinaryExpr::Op::Eq:
     case ast::BinaryExpr::Op::NotEq:
     case ast::BinaryExpr::Op::Le:
@@ -189,8 +207,9 @@ private:
     case Token::Identifier:
       return parseIdentifierOrCallExpr();
     case Token::Minus:
-      return parseUnaryExpr(context);
+      return parseUnaryExpr(ast::UnaryExpr::Op::Neg, context);
     case Token::Not:
+      return parseUnaryExpr(ast::UnaryExpr::Op::Not, context);
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Function:
@@ -261,9 +280,9 @@ private:
         name, std::move(args), source::Range{name.getRange().getBegin(), end});
   }
 
-  ast::ExprPtr parseUnaryExpr(llvm::StringRef context) {
+  ast::ExprPtr parseUnaryExpr(ast::UnaryExpr::Op op, llvm::StringRef context) {
     source::Position begin{TheLexer.getRange().getBegin()};
-    TheLexer.consume(Token::Minus);
+    TheLexer.consume(ToToken(op));
 
     ast::ExprPtr operand{parsePrimaryExpr(context)};
     if (!operand) {
@@ -271,8 +290,8 @@ private:
     }
     source::Position end{operand->getRange().getEnd()};
 
-    return std::make_unique<ast::UnaryExpr>(
-        ast::UnaryExpr::Op::Neg, std::move(operand), source::Range{begin, end});
+    return std::make_unique<ast::UnaryExpr>(op, std::move(operand),
+                                            source::Range{begin, end});
   }
 
   ast::ExprPtr parseBinaryExpr(int minPrec, llvm::StringRef context) {

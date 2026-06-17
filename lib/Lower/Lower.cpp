@@ -52,6 +52,8 @@ static llvm::FCmpInst::Predicate ToFCmpInstPredicate(ast::BinaryExpr::Op op) {
   case ast::BinaryExpr::Op::Sub:
   case ast::BinaryExpr::Op::Mul:
   case ast::BinaryExpr::Op::Div:
+  case ast::BinaryExpr::Op::And:
+  case ast::BinaryExpr::Op::Or:
     break;
   }
   MUA_COVERS_ALL_CASES;
@@ -203,6 +205,8 @@ private:
             llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
       }
       case ast::BinaryExpr::Op::Assign:
+      case ast::BinaryExpr::Op::And:
+      case ast::BinaryExpr::Op::Or:
         break;
       }
       MUA_COVERS_ALL_CASES;
@@ -212,6 +216,8 @@ private:
       switch (ue.getOp()) {
       case mua::ast::UnaryExpr::Op::Neg:
         return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
+      case mua::ast::UnaryExpr::Op::Not:
+        break;
       }
       MUA_COVERS_ALL_CASES;
     }

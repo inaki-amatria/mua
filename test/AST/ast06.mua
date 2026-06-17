@@ -1,0 +1,18 @@
+function foo(bar, baz)
+  return bar and baz or not bar
+end
+
+-- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
+
+--      CHECK:TranslationUnit [{{.*}}ast06.mua:1:1-19:1]
+-- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast06.mua:1:1-3:4]
+-- CHECK-NEXT:    ParamDecl bar [{{.*}}ast06.mua:1:14-17]
+-- CHECK-NEXT:    ParamDecl baz [{{.*}}ast06.mua:1:19-22]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast06.mua:2:3-3:4]
+-- CHECK-NEXT:      ReturnStmt [{{.*}}ast06.mua:2:3-32]
+-- CHECK-NEXT:        BinaryExpr or [{{.*}}ast06.mua:2:10-32]
+-- CHECK-NEXT:          BinaryExpr and [{{.*}}ast06.mua:2:10-21]
+-- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast06.mua:2:10-13]
+-- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast06.mua:2:18-21]
+-- CHECK-NEXT:          UnaryExpr not [{{.*}}ast06.mua:2:25-32]
+-- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast06.mua:2:29-32]

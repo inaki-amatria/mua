@@ -100,6 +100,8 @@ struct BinaryExpr final : public Expr {
     Gt,
     Le,
     Ge,
+    And,
+    Or,
   };
 
   BinaryExpr(Op op, ExprPtr lhs, ExprPtr rhs, source::Range range)
@@ -126,6 +128,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &, BinaryExpr::Op);
 struct UnaryExpr final : public Expr {
   enum class Op {
     Neg,
+    Not,
   };
 
   UnaryExpr(Op op, ExprPtr operand, source::Range range)
