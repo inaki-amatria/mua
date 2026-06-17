@@ -86,6 +86,32 @@ Token Lexer::lex() {
     return Token::Number;
   }
 
+  // Multi-character operators
+  if (peek() == '=' && peek(1) == '=') {
+    advance();
+    advance();
+    Range = makeRange(begin, getOffset());
+    return Token::EqualEqual;
+  }
+  if (peek() == '~' && peek(1) == '=') {
+    advance();
+    advance();
+    Range = makeRange(begin, getOffset());
+    return Token::NotEqual;
+  }
+  if (peek() == '<' && peek(1) == '=') {
+    advance();
+    advance();
+    Range = makeRange(begin, getOffset());
+    return Token::LessOrEqual;
+  }
+  if (peek() == '>' && peek(1) == '=') {
+    advance();
+    advance();
+    Range = makeRange(begin, getOffset());
+    return Token::GreaterOrEqual;
+  }
+
   // Single-character punctuation
   Token token{Token::Invalid};
   switch (peek()) {

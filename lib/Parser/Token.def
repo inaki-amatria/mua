@@ -40,6 +40,12 @@ TOKEN(Invalid, "invalid")
 TOKEN(Identifier, "identifier")
 TOKEN(Number, "number")
 
+// Multi-character operators
+TOKEN(EqualEqual, "==")
+TOKEN(NotEqual, "~=")
+TOKEN(LessOrEqual, "<=")
+TOKEN(GreaterOrEqual, ">=")
+
 // Keywords
 KEYWORD(Function, "function")
 KEYWORD(Return, "return")
@@ -56,6 +62,8 @@ PUNCT(Plus, '+')
 PUNCT(Minus, '-')
 PUNCT(Star, '*')
 PUNCT(Slash, '/')
+PUNCT(LessThan, '<')
+PUNCT(GreaterThan, '>')
 
 #undef PUNCT
 #undef KEYWORD

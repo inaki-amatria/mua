@@ -74,6 +74,12 @@ struct BinaryExprOp final {
       return BinaryExprOp{ast::BinaryExpr::Op::Mul};
     case Token::Slash:
       return BinaryExprOp{ast::BinaryExpr::Op::Div};
+    case Token::EqualEqual:
+    case Token::NotEqual:
+    case Token::LessOrEqual:
+    case Token::GreaterOrEqual:
+    case Token::LessThan:
+    case Token::GreaterThan:
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
@@ -168,6 +174,12 @@ private:
     case Token::If:
     case Token::Then:
     case Token::Equal:
+    case Token::EqualEqual:
+    case Token::NotEqual:
+    case Token::LessOrEqual:
+    case Token::GreaterOrEqual:
+    case Token::LessThan:
+    case Token::GreaterThan:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -271,6 +283,12 @@ private:
     case Token::End:
     case Token::Then:
     case Token::Equal:
+    case Token::EqualEqual:
+    case Token::NotEqual:
+    case Token::LessOrEqual:
+    case Token::GreaterOrEqual:
+    case Token::LessThan:
+    case Token::GreaterThan:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
