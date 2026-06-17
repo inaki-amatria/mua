@@ -33,6 +33,30 @@
 using namespace mua;
 using namespace mua::lower;
 
+static llvm::FCmpInst::Predicate ToFCmpInstPredicate(ast::BinaryExpr::Op op) {
+  switch (op) {
+  case ast::BinaryExpr::Op::Eq:
+    return llvm::FCmpInst::FCMP_OEQ;
+  case ast::BinaryExpr::Op::NotEq:
+    return llvm::FCmpInst::FCMP_ONE;
+  case ast::BinaryExpr::Op::Lt:
+    return llvm::FCmpInst::FCMP_OLT;
+  case ast::BinaryExpr::Op::Gt:
+    return llvm::FCmpInst::FCMP_OGT;
+  case ast::BinaryExpr::Op::Le:
+    return llvm::FCmpInst::FCMP_OLE;
+  case ast::BinaryExpr::Op::Ge:
+    return llvm::FCmpInst::FCMP_OGE;
+  case ast::BinaryExpr::Op::Assign:
+  case ast::BinaryExpr::Op::Add:
+  case ast::BinaryExpr::Op::Sub:
+  case ast::BinaryExpr::Op::Mul:
+  case ast::BinaryExpr::Op::Div:
+    break;
+  }
+  MUA_COVERS_ALL_CASES;
+}
+
 namespace {
 
 struct LowerToLLVMIRVisitor final {
@@ -173,7 +197,13 @@ private:
       case ast::BinaryExpr::Op::Le:
       case ast::BinaryExpr::Op::Ge:
       case ast::BinaryExpr::Op::Lt:
-      case ast::BinaryExpr::Op::Gt:
+      case ast::BinaryExpr::Op::Gt: {
+        llvm::FCmpInst::Predicate pred{ToFCmpInstPredicate(bin.getOp())};
+        llvm::Value *cmp{IRBuilder.CreateFCmp(pred, lhs, rhs)};
+        return IRBuilder.CreateSelect(
+            cmp, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0),
+            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
+      }
       case ast::BinaryExpr::Op::Assign:
         break;
       }

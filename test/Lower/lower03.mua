@@ -1,0 +1,20 @@
+function foo(bar, baz)
+  return bar < baz
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower03.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo(double %0, double %1) {
+--  CHECK-NEXT:  %bar = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %bar, align 8
+--  CHECK-NEXT:  %baz = alloca double, align 8
+--  CHECK-NEXT:  store double %1, ptr %baz, align 8
+--  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %3 = fcmp olt double %bar1, %baz2
+--  CHECK-NEXT:  %4 = select i1 %3, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  ret double %4
+--  CHECK-NEXT:}
