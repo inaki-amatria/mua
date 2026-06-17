@@ -66,6 +66,9 @@ template <typename Visitor> struct Walker final {
     case Node::Kind::BinaryExpr:
       walkChildren(static_cast<const BinaryExpr &>(n));
       break;
+    case Node::Kind::UnaryExpr:
+      walkChildren(static_cast<const UnaryExpr &>(n));
+      break;
     case Node::Kind::ExprStmt:
       walkChildren(static_cast<const ExprStmt &>(n));
       break;
@@ -129,6 +132,13 @@ private:
       walk(*bin.getLHS());
       walk(*bin.getRHS());
       TheVisitor.onExit(bin);
+    }
+  }
+
+  void walkChildren(const UnaryExpr &ue) {
+    if (TheVisitor.onEnter(ue)) {
+      walk(*ue.getOperand());
+      TheVisitor.onExit(ue);
     }
   }
 

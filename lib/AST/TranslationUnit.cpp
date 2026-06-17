@@ -66,6 +66,15 @@ struct DumpVisitor final {
 
   void onExit(const BinaryExpr &) { --Level; }
 
+  bool onEnter(const UnaryExpr &ue) {
+    printIndent();
+    OS << "UnaryExpr " << ue.getOp() << " [" << ue.getRange() << "]\n";
+    ++Level;
+    return true;
+  }
+
+  void onExit(const UnaryExpr &) { --Level; }
+
   bool onEnter(const ExprStmt &es) {
     printIndent();
     OS << "ExprStmt [" << es.getRange() << "]\n";

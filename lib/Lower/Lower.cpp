@@ -209,6 +209,7 @@ private:
       }
       MUA_COVERS_ALL_CASES;
     }
+    case ast::Node::Kind::UnaryExpr:
     case ast::Node::Kind::ExprStmt:
     case ast::Node::Kind::ReturnStmt:
     case ast::Node::Kind::CompoundStmt:

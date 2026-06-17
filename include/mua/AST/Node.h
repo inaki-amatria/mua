@@ -36,7 +36,8 @@ struct Node {
     IdentifierExpr,
     CallExpr,
     BinaryExpr,
-    LastExpr = BinaryExpr,
+    UnaryExpr,
+    LastExpr = UnaryExpr,
 
     // Statements
     FirstStmt,

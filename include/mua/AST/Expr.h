@@ -122,6 +122,27 @@ private:
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &, BinaryExpr::Op);
 
+/// Expression representing a unary operation
+struct UnaryExpr final : public Expr {
+  enum class Op {
+    Neg,
+  };
+
+  UnaryExpr(Op op, ExprPtr operand, source::Range range)
+      : Expr{Kind::UnaryExpr, range}, TheOp{op}, Operand{std::move(operand)} {}
+
+  Op getOp() const { return TheOp; }
+  const Expr *getOperand() const { return Operand.get(); }
+
+  static bool classof(const Node *n) { return n->getKind() == Kind::UnaryExpr; }
+
+private:
+  Op TheOp;
+  ExprPtr Operand;
+};
+
+llvm::raw_ostream &operator<<(llvm::raw_ostream &, UnaryExpr::Op);
+
 } // namespace mua::ast
 
 #endif // MUA_AST_EXPR_H

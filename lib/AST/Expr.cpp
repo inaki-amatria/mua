@@ -56,3 +56,12 @@ llvm::raw_ostream &mua::ast::operator<<(llvm::raw_ostream &os,
   }
   MUA_COVERS_ALL_CASES;
 }
+
+llvm::raw_ostream &mua::ast::operator<<(llvm::raw_ostream &os,
+                                        UnaryExpr::Op op) {
+  switch (op) {
+  case UnaryExpr::Op::Neg:
+    return os << '-';
+  }
+  MUA_COVERS_ALL_CASES;
+}
