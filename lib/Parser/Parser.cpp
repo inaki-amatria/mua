@@ -185,6 +185,8 @@ private:
       return parseNumberExpr(context);
     case Token::Identifier:
       return parseIdentifierOrCallExpr();
+    case Token::Minus:
+      return parseUnaryExpr(context);
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Function:
@@ -203,7 +205,6 @@ private:
     case Token::LParen:
     case Token::RParen:
     case Token::Plus:
-    case Token::Minus:
     case Token::Star:
     case Token::Slash:
       return error<ast::Expr>(Expected::Kind::Expr, context);
@@ -252,6 +253,20 @@ private:
 
     return std::make_unique<ast::CallExpr>(
         name, std::move(args), source::Range{name.getRange().getBegin(), end});
+  }
+
+  ast::ExprPtr parseUnaryExpr(llvm::StringRef context) {
+    source::Position begin{TheLexer.getRange().getBegin()};
+    TheLexer.consume(Token::Minus);
+
+    ast::ExprPtr operand{parsePrimaryExpr(context)};
+    if (!operand) {
+      return nullptr;
+    }
+    source::Position end{operand->getRange().getEnd()};
+
+    return std::make_unique<ast::UnaryExpr>(
+        ast::UnaryExpr::Op::Neg, std::move(operand), source::Range{begin, end});
   }
 
   ast::ExprPtr parseBinaryExpr(int minPrec, llvm::StringRef context) {

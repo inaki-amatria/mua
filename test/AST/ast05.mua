@@ -1,0 +1,13 @@
+function foo(bar)
+  return -bar
+end
+
+-- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
+
+--      CHECK:TranslationUnit [{{.*}}ast05.mua:1:1-14:1]
+-- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast05.mua:1:1-3:4]
+-- CHECK-NEXT:    ParamDecl bar [{{.*}}ast05.mua:1:14-17]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast05.mua:2:3-3:4]
+-- CHECK-NEXT:      ReturnStmt [{{.*}}ast05.mua:2:3-14]
+-- CHECK-NEXT:        UnaryExpr - [{{.*}}ast05.mua:2:10-14]
+-- CHECK-NEXT:          IdentifierExpr bar [{{.*}}ast05.mua:2:11-14]
