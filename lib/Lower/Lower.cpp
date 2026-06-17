@@ -85,21 +85,40 @@ struct LowerToLLVMIRVisitor final {
     llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
     llvm::BasicBlock *thenBB{
         llvm::BasicBlock::Create(*LLVMContext, "if.then", function)};
+    llvm::BasicBlock *elseBB{nullptr};
+    if (is.getElseBody()) {
+      elseBB = llvm::BasicBlock::Create(*LLVMContext, "if.else", function);
+    }
     llvm::BasicBlock *mergeBB{
         llvm::BasicBlock::Create(*LLVMContext, "if.end", function)};
-    IRBuilder.CreateCondBr(isTruthy(condition), thenBB, mergeBB);
-    IRBuilder.SetInsertPoint(thenBB);
-    MergeBBStack.push_back(mergeBB);
-    return true;
-  }
 
-  void onExit(const ast::IfStmt &) {
-    llvm::BasicBlock *mergeBB{MergeBBStack.back()};
-    if (!IRBuilder.GetInsertBlock()->hasTerminator()) {
+    IRBuilder.CreateCondBr(isTruthy(condition), thenBB,
+                           is.getElseBody() ? elseBB : mergeBB);
+
+    IRBuilder.SetInsertPoint(thenBB);
+    ast::Walk(*is.getIfBody(), *this);
+    bool thenTerminated{IRBuilder.GetInsertBlock()->hasTerminator()};
+    if (!thenTerminated) {
       IRBuilder.CreateBr(mergeBB);
     }
-    IRBuilder.SetInsertPoint(mergeBB);
-    MergeBBStack.pop_back();
+
+    bool elseTerminated{false};
+    if (const ast::CompoundStmt *elseBody{is.getElseBody()}) {
+      IRBuilder.SetInsertPoint(elseBB);
+      ast::Walk(*elseBody, *this);
+      elseTerminated = IRBuilder.GetInsertBlock()->hasTerminator();
+      if (!elseTerminated) {
+        IRBuilder.CreateBr(mergeBB);
+      }
+    }
+
+    if (thenTerminated && elseTerminated) {
+      mergeBB->eraseFromParent();
+    } else {
+      IRBuilder.SetInsertPoint(mergeBB);
+    }
+
+    return false;
   }
 
   bool onEnter(const ast::FunctionDecl &fn) {
@@ -271,8 +290,6 @@ private:
 
   llvm::IRBuilder<> IRBuilder;
   llvm::DenseMap<const sema::Symbol *, llvm::Value *> SymbolToValue;
-
-  std::vector<llvm::BasicBlock *> MergeBBStack;
 };
 
 } // namespace

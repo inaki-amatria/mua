@@ -1,0 +1,42 @@
+function foo(a, b, c)
+  if a then
+    return 1
+  elseif b then
+    return 2
+  else
+    return 3
+  end
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+-- CHECK-NOT:if.end
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower09.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo(double %0, double %1, double %2) {
+--  CHECK-NEXT:  %a = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %a, align 8
+--  CHECK-NEXT:  %b = alloca double, align 8
+--  CHECK-NEXT:  store double %1, ptr %b, align 8
+--  CHECK-NEXT:  %c = alloca double, align 8
+--  CHECK-NEXT:  store double %2, ptr %c, align 8
+--  CHECK-NEXT:  %a1 = load double, ptr %a, align 8
+--  CHECK-NEXT:  %4 = fcmp one double %a1, 0.000000e+00
+--  CHECK-NEXT:  br i1 %4, label %if.then, label %if.else
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.then:
+--  CHECK-NEXT:  ret double 1.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.else:
+--  CHECK-NEXT:  %b2 = load double, ptr %b, align 8
+--  CHECK-NEXT:  %5 = fcmp one double %b2, 0.000000e+00
+--  CHECK-NEXT:  br i1 %5, label %if.then3, label %if.else4
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.then3:
+--  CHECK-NEXT:  ret double 2.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.else4:
+--  CHECK-NEXT:  ret double 3.000000e+00
+--  CHECK-NEXT:}
