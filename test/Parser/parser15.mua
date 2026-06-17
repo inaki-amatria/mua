@@ -1,0 +1,10 @@
+function foo()
+  if bar then
+  else
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected expression in else body
+--  CHECK-NEXT:{{.*}}parser15.mua:11:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

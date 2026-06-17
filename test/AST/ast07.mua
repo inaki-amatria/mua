@@ -1,0 +1,29 @@
+function foo()
+  if bar then
+    return 1
+  elseif baz then
+    return 2
+  else
+    return 3
+  end
+end
+
+-- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
+
+--      CHECK:TranslationUnit [{{.*}}ast07.mua:1:1-30:1]
+-- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast07.mua:1:1-9:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast07.mua:2:3-9:1]
+-- CHECK-NEXT:      IfStmt [{{.*}}ast07.mua:2:3-8:6]
+-- CHECK-NEXT:        IdentifierExpr bar [{{.*}}ast07.mua:2:6-9]
+-- CHECK-NEXT:        CompoundStmt [{{.*}}ast07.mua:3:5-4:3]
+-- CHECK-NEXT:          ReturnStmt [{{.*}}ast07.mua:3:5-13]
+-- CHECK-NEXT:            NumberExpr 1.000000e+00 [{{.*}}ast07.mua:3:12-13]
+-- CHECK-NEXT:        CompoundStmt [{{.*}}ast07.mua:4:3-8:3]
+-- CHECK-NEXT:          IfStmt [{{.*}}ast07.mua:4:3-8:3]
+-- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast07.mua:4:10-13]
+-- CHECK-NEXT:            CompoundStmt [{{.*}}ast07.mua:5:5-6:3]
+-- CHECK-NEXT:              ReturnStmt [{{.*}}ast07.mua:5:5-13]
+-- CHECK-NEXT:                NumberExpr 2.000000e+00 [{{.*}}ast07.mua:5:12-13]
+-- CHECK-NEXT:            CompoundStmt [{{.*}}ast07.mua:7:5-8:3]
+-- CHECK-NEXT:              ReturnStmt [{{.*}}ast07.mua:7:5-13]
+-- CHECK-NEXT:                NumberExpr 3.000000e+00 [{{.*}}ast07.mua:7:12-13]

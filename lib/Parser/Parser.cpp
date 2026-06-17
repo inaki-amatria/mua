@@ -421,7 +421,8 @@ private:
 
   ast::StmtPtr parseIfStmt() {
     source::Position begin{TheLexer.getRange().getBegin()};
-    TheLexer.consume(Token::If);
+    bool isOuter{TheLexer.getCurrent() == Token::If};
+    TheLexer.consume(isOuter ? Token::If : Token::ElseIf);
 
     ast::ExprPtr condition{parseExpr("after if")};
     if (!condition) {
@@ -433,15 +434,42 @@ private:
     }
     TheLexer.consume(Token::Then);
 
-    ast::CompoundStmtPtr body{
-        parseCompoundStmt("in if body", /*terminators=*/{Token::End})};
-    if (!body) {
+    ast::CompoundStmtPtr ifBody{parseCompoundStmt(
+        isOuter ? "in if body" : "in elseif body",
+        /*terminators=*/{Token::End, Token::Else, Token::ElseIf})};
+    if (!ifBody) {
       return nullptr;
     }
-    source::Position end{TheLexer.getRange().getEnd()};
-    TheLexer.consume(Token::End);
 
-    return std::make_unique<ast::IfStmt>(std::move(condition), std::move(body),
+    ast::CompoundStmtPtr elseBody;
+    if (TheLexer.getCurrent() == Token::ElseIf) {
+      ast::StmtPtr elseIf{parseIfStmt()};
+      if (!elseIf) {
+        return nullptr;
+      }
+      source::Position elseBegin{elseIf->getRange().getBegin()};
+      source::Position elseEnd{elseIf->getRange().getEnd()};
+      std::vector<ast::StmtPtr> stmts;
+      stmts.push_back(std::move(elseIf));
+      elseBody = std::make_unique<ast::CompoundStmt>(
+          std::move(stmts), source::Range{elseBegin, elseEnd});
+    } else if (TheLexer.getCurrent() == Token::Else) {
+      TheLexer.consume(Token::Else);
+      elseBody =
+          parseCompoundStmt("in else body", /*terminators=*/{Token::End});
+      if (!elseBody) {
+        return nullptr;
+      }
+    }
+
+    source::Position end{isOuter ? TheLexer.getRange().getEnd()
+                                 : TheLexer.getRange().getBegin()};
+    if (isOuter) {
+      TheLexer.consume(Token::End);
+    }
+
+    return std::make_unique<ast::IfStmt>(std::move(condition),
+                                         std::move(ifBody), std::move(elseBody),
                                          source::Range{begin, end});
   }
 

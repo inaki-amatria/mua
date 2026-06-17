@@ -95,7 +95,7 @@ struct AnalyzerVisitor final {
     return checkValueExpr(*is.getCondition());
   }
 
-  void onExit(const ast::IfStmt &is) { checkReturnStmt(*is.getBody()); }
+  void onExit(const ast::IfStmt &is) { checkReturnStmt(*is.getIfBody()); }
 
   bool onEnter(const ast::ParamDecl &pd) {
     auto [symbol,

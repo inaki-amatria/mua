@@ -168,7 +168,10 @@ private:
   void walkChildren(const IfStmt &is) {
     if (TheVisitor.onEnter(is)) {
       walk(*is.getCondition());
-      walk(*is.getBody());
+      walk(*is.getIfBody());
+      if (const CompoundStmt *elseBody{is.getElseBody()}) {
+        walk(*elseBody);
+      }
       TheVisitor.onExit(is);
     }
   }
