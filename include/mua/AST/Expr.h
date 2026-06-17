@@ -94,6 +94,12 @@ struct BinaryExpr final : public Expr {
     Sub,
     Mul,
     Div,
+    Eq,
+    NotEq,
+    Lt,
+    Gt,
+    Le,
+    Ge,
   };
 
   BinaryExpr(Op op, ExprPtr lhs, ExprPtr rhs, source::Range range)

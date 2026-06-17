@@ -41,6 +41,18 @@ llvm::raw_ostream &mua::ast::operator<<(llvm::raw_ostream &os,
     return os << '*';
   case BinaryExpr::Op::Div:
     return os << '/';
+  case BinaryExpr::Op::Eq:
+    return os << "==";
+  case BinaryExpr::Op::NotEq:
+    return os << "~=";
+  case BinaryExpr::Op::Le:
+    return os << "<=";
+  case BinaryExpr::Op::Ge:
+    return os << ">=";
+  case BinaryExpr::Op::Lt:
+    return os << '<';
+  case BinaryExpr::Op::Gt:
+    return os << '>';
   }
   MUA_COVERS_ALL_CASES;
 }

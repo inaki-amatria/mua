@@ -75,11 +75,17 @@ struct BinaryExprOp final {
     case Token::Slash:
       return BinaryExprOp{ast::BinaryExpr::Op::Div};
     case Token::EqualEqual:
+      return BinaryExprOp{ast::BinaryExpr::Op::Eq};
     case Token::NotEqual:
+      return BinaryExprOp{ast::BinaryExpr::Op::NotEq};
     case Token::LessOrEqual:
+      return BinaryExprOp{ast::BinaryExpr::Op::Le};
     case Token::GreaterOrEqual:
+      return BinaryExprOp{ast::BinaryExpr::Op::Ge};
     case Token::LessThan:
+      return BinaryExprOp{ast::BinaryExpr::Op::Lt};
     case Token::GreaterThan:
+      return BinaryExprOp{ast::BinaryExpr::Op::Gt};
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
@@ -103,12 +109,19 @@ struct BinaryExprOp final {
     switch (Op) {
     case ast::BinaryExpr::Op::Assign:
       return 10;
+    case ast::BinaryExpr::Op::Eq:
+    case ast::BinaryExpr::Op::NotEq:
+    case ast::BinaryExpr::Op::Le:
+    case ast::BinaryExpr::Op::Ge:
+    case ast::BinaryExpr::Op::Lt:
+    case ast::BinaryExpr::Op::Gt:
+      return 20;
     case ast::BinaryExpr::Op::Add:
     case ast::BinaryExpr::Op::Sub:
-      return 20;
+      return 30;
     case ast::BinaryExpr::Op::Mul:
     case ast::BinaryExpr::Op::Div:
-      return 30;
+      return 40;
     }
     MUA_COVERS_ALL_CASES;
   }
@@ -117,6 +130,12 @@ struct BinaryExprOp final {
     switch (Op) {
     case ast::BinaryExpr::Op::Assign:
       return true;
+    case ast::BinaryExpr::Op::Eq:
+    case ast::BinaryExpr::Op::NotEq:
+    case ast::BinaryExpr::Op::Le:
+    case ast::BinaryExpr::Op::Ge:
+    case ast::BinaryExpr::Op::Lt:
+    case ast::BinaryExpr::Op::Gt:
     case ast::BinaryExpr::Op::Add:
     case ast::BinaryExpr::Op::Sub:
     case ast::BinaryExpr::Op::Mul:

@@ -168,6 +168,12 @@ private:
         return IRBuilder.CreateFMul(lhs, rhs);
       case ast::BinaryExpr::Op::Div:
         return IRBuilder.CreateFDiv(lhs, rhs);
+      case ast::BinaryExpr::Op::Eq:
+      case ast::BinaryExpr::Op::NotEq:
+      case ast::BinaryExpr::Op::Le:
+      case ast::BinaryExpr::Op::Ge:
+      case ast::BinaryExpr::Op::Lt:
+      case ast::BinaryExpr::Op::Gt:
       case ast::BinaryExpr::Op::Assign:
         break;
       }
