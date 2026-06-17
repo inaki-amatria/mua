@@ -209,7 +209,14 @@ private:
       }
       MUA_COVERS_ALL_CASES;
     }
-    case ast::Node::Kind::UnaryExpr:
+    case ast::Node::Kind::UnaryExpr: {
+      const auto &ue{static_cast<const ast::UnaryExpr &>(expr)};
+      switch (ue.getOp()) {
+      case mua::ast::UnaryExpr::Op::Neg:
+        return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
+      }
+      MUA_COVERS_ALL_CASES;
+    }
     case ast::Node::Kind::ExprStmt:
     case ast::Node::Kind::ReturnStmt:
     case ast::Node::Kind::CompoundStmt:
