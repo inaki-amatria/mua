@@ -13,7 +13,7 @@ end
 -- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast04.mua:1:1-8:4]
 -- CHECK-NEXT:    ParamDecl bar [{{.*}}ast04.mua:1:14-17]
 -- CHECK-NEXT:    ParamDecl baz [{{.*}}ast04.mua:1:19-22]
--- CHECK-NEXT:    CompoundStmt [{{.*}}ast04.mua:2:3-8:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast04.mua:2:3-8:1]
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:2:3-19]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:2:3-19]
 -- CHECK-NEXT:          IdentifierExpr qux [{{.*}}ast04.mua:2:3-6]

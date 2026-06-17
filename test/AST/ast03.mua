@@ -7,7 +7,7 @@ end
 
 --      CHECK:TranslationUnit [{{.*}}ast03.mua:1:1-14:1]
 -- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast03.mua:1:1-4:4]
--- CHECK-NEXT:    CompoundStmt [{{.*}}ast03.mua:2:3-4:4]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast03.mua:2:3-4:1]
 -- CHECK-NEXT:      IfStmt [{{.*}}ast03.mua:2:3-3:6]
 -- CHECK-NEXT:        IdentifierExpr bar [{{.*}}ast03.mua:2:6-9]
--- CHECK-NEXT:        CompoundStmt [{{.*}}ast03.mua:3:3-6]
+-- CHECK-NEXT:        CompoundStmt [{{.*}}ast03.mua:3:3-3]

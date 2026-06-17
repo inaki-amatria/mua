@@ -385,19 +385,29 @@ private:
                                              source::Range{begin, end});
   }
 
-  ast::CompoundStmtPtr parseCompoundStmt(llvm::StringRef context) {
+  ast::CompoundStmtPtr
+  parseCompoundStmt(llvm::StringRef context,
+                    std::initializer_list<Token> terminators) {
     source::Position begin{TheLexer.getRange().getBegin()};
 
+    auto isTerminator{[&](Token token) {
+      for (Token terminator : terminators) {
+        if (token == terminator) {
+          return true;
+        }
+      }
+      return false;
+    }};
+
     std::vector<ast::StmtPtr> stmts;
-    while (TheLexer.getCurrent() != Token::End) {
+    while (!isTerminator(TheLexer.getCurrent())) {
       ast::StmtPtr stmt{parseStmt(context)};
       if (!stmt) {
         return nullptr;
       }
       stmts.push_back(std::move(stmt));
     }
-    source::Position end{TheLexer.getRange().getEnd()};
-    TheLexer.consume(Token::End);
+    source::Position end{TheLexer.getRange().getBegin()};
 
     return std::make_unique<ast::CompoundStmt>(std::move(stmts),
                                                source::Range{begin, end});
@@ -417,11 +427,13 @@ private:
     }
     TheLexer.consume(Token::Then);
 
-    ast::CompoundStmtPtr body{parseCompoundStmt("in if body")};
+    ast::CompoundStmtPtr body{
+        parseCompoundStmt("in if body", /*terminators=*/{Token::End})};
     if (!body) {
       return nullptr;
     }
-    source::Position end{body->getRange().getEnd()};
+    source::Position end{TheLexer.getRange().getEnd()};
+    TheLexer.consume(Token::End);
 
     return std::make_unique<ast::IfStmt>(std::move(condition), std::move(body),
                                          source::Range{begin, end});
@@ -469,11 +481,13 @@ private:
     }
     TheLexer.consume(Token::RParen);
 
-    ast::CompoundStmtPtr body{parseCompoundStmt("in function body")};
+    ast::CompoundStmtPtr body{
+        parseCompoundStmt("in function body", /*terminators=*/{Token::End})};
     if (!body) {
       return nullptr;
     }
-    source::Position end{body->getRange().getEnd()};
+    source::Position end{TheLexer.getRange().getEnd()};
+    TheLexer.consume(Token::End);
 
     return std::make_unique<ast::FunctionDecl>(
         name, std::move(params), std::move(body), source::Range{begin, end});
