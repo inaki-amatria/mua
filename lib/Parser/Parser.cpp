@@ -110,6 +110,8 @@ struct BinaryExprOp final {
     case Token::If:
     case Token::Then:
     case Token::Not:
+    case Token::Else:
+    case Token::ElseIf:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -226,6 +228,8 @@ private:
     case Token::GreaterThan:
     case Token::And:
     case Token::Or:
+    case Token::Else:
+    case Token::ElseIf:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -351,6 +355,8 @@ private:
     case Token::And:
     case Token::Or:
     case Token::Not:
+    case Token::Else:
+    case Token::ElseIf:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
