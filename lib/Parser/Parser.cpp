@@ -86,6 +86,8 @@ struct BinaryExprOp final {
       return BinaryExprOp{ast::BinaryExpr::Op::Lt};
     case Token::GreaterThan:
       return BinaryExprOp{ast::BinaryExpr::Op::Gt};
+    case Token::And:
+    case Token::Or:
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
@@ -95,6 +97,7 @@ struct BinaryExprOp final {
     case Token::End:
     case Token::If:
     case Token::Then:
+    case Token::Not:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -187,6 +190,7 @@ private:
       return parseIdentifierOrCallExpr();
     case Token::Minus:
       return parseUnaryExpr(context);
+    case Token::Not:
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Function:
@@ -201,6 +205,8 @@ private:
     case Token::GreaterOrEqual:
     case Token::LessThan:
     case Token::GreaterThan:
+    case Token::And:
+    case Token::Or:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -323,6 +329,9 @@ private:
     case Token::GreaterOrEqual:
     case Token::LessThan:
     case Token::GreaterThan:
+    case Token::And:
+    case Token::Or:
+    case Token::Not:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
