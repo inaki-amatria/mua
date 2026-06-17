@@ -85,9 +85,7 @@ struct LowerToLLVMIRVisitor final {
         llvm::BasicBlock::Create(*LLVMContext, "if.then", function)};
     llvm::BasicBlock *mergeBB{
         llvm::BasicBlock::Create(*LLVMContext, "if.end", function)};
-    llvm::Value *fCmpONE{IRBuilder.CreateFCmpONE(
-        condition, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0))};
-    IRBuilder.CreateCondBr(fCmpONE, thenBB, mergeBB);
+    IRBuilder.CreateCondBr(isTruthy(condition), thenBB, mergeBB);
     IRBuilder.SetInsertPoint(thenBB);
     MergeBBStack.push_back(mergeBB);
     return true;
@@ -227,6 +225,11 @@ private:
       break;
     }
     MUA_COVERS_ALL_CASES;
+  }
+
+  llvm::Value *isTruthy(llvm::Value *value) {
+    return IRBuilder.CreateFCmpONE(
+        value, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
   }
 
   std::unique_ptr<llvm::LLVMContext> LLVMContext;
