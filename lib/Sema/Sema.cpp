@@ -79,6 +79,10 @@ struct AnalyzerVisitor final {
     return checkValueExpr(*bin.getLHS()) && checkValueExpr(*bin.getRHS());
   }
 
+  bool onEnter(const ast::UnaryExpr &ue) {
+    return checkValueExpr(*ue.getOperand());
+  }
+
   bool onEnter(const ast::ExprStmt &es) {
     return checkValueExpr(*es.getExpr());
   }
