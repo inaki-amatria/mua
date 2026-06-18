@@ -151,7 +151,7 @@ private:
     bool terminal{false};
     for (const ast::StmtPtr &stmt : cs.getStmts()) {
       if (terminal) {
-        error(stmt->getRange(), "unreachable statement after return");
+        error(stmt->getRange(), "unreachable statement");
         continue;
       }
       if (llvm::isa<ast::ReturnStmt>(stmt.get())) {

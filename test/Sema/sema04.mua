@@ -5,7 +5,7 @@ end
 
 -- RUN: not %muac -emit=sema %s 2>&1 | FileCheck %s
 
---      CHECK:error: unreachable statement after return
+--      CHECK:error: unreachable statement
 -- CHECK-NEXT:{{.*}}sema04.mua:3:3-13
 -- CHECK-NEXT:  return bar
 -- CHECK-NEXT:  ^^^^^^^^^^

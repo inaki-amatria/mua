@@ -20,7 +20,7 @@ end
 -- CHECK-NEXT:{{.*}}sema05.mua:1:10-13
 -- CHECK-NEXT:function foo()
 -- CHECK-NEXT:         ^^^
--- CHECK-NEXT:error: unreachable statement after return
+-- CHECK-NEXT:error: unreachable statement
 -- CHECK-NEXT:{{.*}}sema05.mua:7:5-15
 -- CHECK-NEXT:    return bar
 -- CHECK-NEXT:    ^^^^^^^^^^
