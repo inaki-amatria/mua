@@ -119,7 +119,7 @@ struct AnalyzerVisitor final {
   }
 
   void onExit(const ast::FunctionDecl &fn) {
-    if (!checkReturnStmt(*fn.getBody())) {
+    if (!checkControlFlow(*fn.getBody())) {
       error(fn.getRange(), "function " + fn.getName() + " must return a value");
     }
     CurrentScope = CurrentScope->getParent();
@@ -144,29 +144,30 @@ private:
     return false;
   }
 
-  /// Check the given CompoundStmt for unreachable code after return-like
-  /// statements. Returns true if the last statement is terminal
-  bool checkReturnStmt(const ast::CompoundStmt &cs) {
-    bool sawReturn{false};
+  /// Analyze control flow within a CompoundStmt. Reports unreachable code
+  /// after terminal statements. Returns true if the last statement is terminal
+  /// (guarantees a return in all paths)
+  bool checkControlFlow(const ast::CompoundStmt &cs) {
+    bool terminal{false};
     for (const ast::StmtPtr &stmt : cs.getStmts()) {
-      if (sawReturn) {
+      if (terminal) {
         error(stmt->getRange(), "unreachable statement after return");
         continue;
       }
       if (llvm::isa<ast::ReturnStmt>(stmt.get())) {
-        sawReturn = true;
+        terminal = true;
       }
       if (const auto *is{llvm::dyn_cast<ast::IfStmt>(stmt.get())}) {
-        bool bodyReturns{checkReturnStmt(*is->getIfBody())};
+        bool bodyTerminal{checkControlFlow(*is->getIfBody())};
         if (const ast::CompoundStmt *elseBody{is->getElseBody()}) {
-          bool elseReturns{checkReturnStmt(*elseBody)};
-          if (bodyReturns && elseReturns) {
-            sawReturn = true;
+          bool elseTerminal{checkControlFlow(*elseBody)};
+          if (bodyTerminal && elseTerminal) {
+            terminal = true;
           }
         }
       }
     }
-    return sawReturn;
+    return terminal;
   }
 
   void error(source::Range range, llvm::Twine message) {
