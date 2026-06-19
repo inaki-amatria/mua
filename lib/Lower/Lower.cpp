@@ -121,6 +121,30 @@ struct LowerToLLVMIRVisitor final {
     return false;
   }
 
+  bool onEnter(const ast::WhileStmt &ws) {
+    llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
+    llvm::BasicBlock *condBB{
+        llvm::BasicBlock::Create(*LLVMContext, "while.cond", function)};
+    llvm::BasicBlock *bodyBB{
+        llvm::BasicBlock::Create(*LLVMContext, "while.body", function)};
+    llvm::BasicBlock *mergeBB{
+        llvm::BasicBlock::Create(*LLVMContext, "while.end", function)};
+
+    IRBuilder.CreateBr(condBB);
+    IRBuilder.SetInsertPoint(condBB);
+    llvm::Value *condition{lower(*ws.getCondition())};
+    IRBuilder.CreateCondBr(isTruthy(condition), bodyBB, mergeBB);
+
+    IRBuilder.SetInsertPoint(bodyBB);
+    ast::Walk(*ws.getBody(), *this);
+    if (!IRBuilder.GetInsertBlock()->hasTerminator()) {
+      IRBuilder.CreateBr(condBB);
+    }
+
+    IRBuilder.SetInsertPoint(mergeBB);
+    return false;
+  }
+
   bool onEnter(const ast::FunctionDecl &fn) {
     const sema::Symbol *symbol{CurrentScope->lookup(fn.getName())};
     const sema::Scope *scope{symbol->getScope()};

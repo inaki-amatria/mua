@@ -1,0 +1,30 @@
+function foo(n)
+  while n do
+    return n
+  end
+  return n
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--       CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower11.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo(double %0) {
+--  CHECK-NEXT:  %n = alloca double, align 8
+--  CHECK-NEXT:  store double %0, ptr %n, align 8
+--  CHECK-NEXT:  br label %while.cond
+-- CHECK-EMPTY:
+--  CHECK-NEXT:while.cond:                                       ; preds = %1
+--  CHECK-NEXT:  %n1 = load double, ptr %n, align 8
+--  CHECK-NEXT:  %2 = fcmp one double %n1, 0.000000e+00
+--  CHECK-NEXT:  br i1 %2, label %while.body, label %while.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:while.body:                                       ; preds = %while.cond
+--  CHECK-NEXT:  %n2 = load double, ptr %n, align 8
+--  CHECK-NEXT:  ret double %n2
+-- CHECK-EMPTY:
+--  CHECK-NEXT:while.end:                                        ; preds = %while.cond
+--  CHECK-NEXT:  %n3 = load double, ptr %n, align 8
+--  CHECK-NEXT:  ret double %n3
+--  CHECK-NEXT:}
