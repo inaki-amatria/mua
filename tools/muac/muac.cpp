@@ -36,17 +36,17 @@ static llvm::cl::opt<std::string> InputFilename{
     llvm::cl::init("-"), llvm::cl::value_desc{"filename"}};
 
 namespace {
-enum class Action { None, DumpAST, DumpSema, DumpLLVM, EmitObj };
+enum class Action { None, EmitAST, EmitSema, EmitLLVM, EmitObj };
 } // namespace
 
 static llvm::cl::opt<enum Action> EmitAction(
-    "emit", llvm::cl::desc{"Select the intermediate representation to emit"},
+    "emit", llvm::cl::desc{"Select the output to emit"},
     llvm::cl::init(Action::None),
-    llvm::cl::values(clEnumValN(Action::DumpAST, "ast",
+    llvm::cl::values(clEnumValN(Action::EmitAST, "ast",
                                 "Emit an abstract syntax tree dump")),
-    llvm::cl::values(clEnumValN(Action::DumpSema, "sema",
+    llvm::cl::values(clEnumValN(Action::EmitSema, "sema",
                                 "Emit the semantic representation")),
-    llvm::cl::values(clEnumValN(Action::DumpLLVM, "llvm",
+    llvm::cl::values(clEnumValN(Action::EmitLLVM, "llvm",
                                 "Emit the LLVM IR module")),
     llvm::cl::values(clEnumValN(Action::EmitObj, "obj",
                                 "Emit the object code")));
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   if (!tu) {
     return 3;
   }
-  if (EmitAction == Action::DumpAST) {
+  if (EmitAction == Action::EmitAST) {
     mua::ast::Dump(*tu, llvm::errs());
     return 0;
   }
@@ -79,13 +79,13 @@ int main(int argc, char *argv[]) {
   if (!scope) {
     return 4;
   }
-  if (EmitAction == Action::DumpSema) {
+  if (EmitAction == Action::EmitSema) {
     mua::sema::Dump(*scope, llvm::errs());
     return 0;
   }
 
   mua::lower::IRUnit theIRUnit{mua::lower::LowerToLLVMIR(*tu, *scope)};
-  if (EmitAction == Action::DumpLLVM) {
+  if (EmitAction == Action::EmitLLVM) {
     mua::lower::Dump(theIRUnit, llvm::errs());
     return 0;
   }
