@@ -204,7 +204,7 @@ private:
   }
 
   llvm::Value *lowerNumberExpr(const ast::NumberExpr &ne) {
-    return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), ne.getValue());
+    return getConstant(ne.getValue());
   }
 
   llvm::Value *lowerIdentifierExpr(const ast::IdentifierExpr &id) {
@@ -287,10 +287,8 @@ private:
       return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
     case mua::ast::UnaryExpr::Op::Not:
       llvm::Value *operand{lower(*ue.getOperand())};
-      return IRBuilder.CreateSelect(
-          isTruthy(operand),
-          llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0),
-          llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0));
+      return IRBuilder.CreateSelect(isTruthy(operand), getConstant(0.0),
+                                    getConstant(1.0));
     }
     MUA_COVERS_ALL_CASES;
   }
@@ -299,14 +297,15 @@ private:
                                const ast::BinaryExpr &bin) {
     llvm::Value *cmp{
         IRBuilder.CreateFCmp(pred, lower(*bin.getLHS()), lower(*bin.getRHS()))};
-    return IRBuilder.CreateSelect(
-        cmp, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0),
-        llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
+    return IRBuilder.CreateSelect(cmp, getConstant(1.0), getConstant(0.0));
   }
 
   llvm::Value *isTruthy(llvm::Value *value) {
-    return IRBuilder.CreateFCmpONE(
-        value, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
+    return IRBuilder.CreateFCmpONE(value, getConstant(0.0));
+  }
+
+  llvm::Constant *getConstant(double value) {
+    return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), value);
   }
 
   std::unique_ptr<llvm::LLVMContext> LLVMContext;
