@@ -1,7 +1,7 @@
 # mua
 
-A toy compiled language with Lua-inspired syntax. Emits LLVM IR. The compiler is
-called `muac`, the sound of a kiss in Spanish.
+A toy compiled language with Lua-inspired syntax. Emits object code. The
+compiler is called `muac`, the sound of a kiss in Spanish.
 
 ## Backstory
 
