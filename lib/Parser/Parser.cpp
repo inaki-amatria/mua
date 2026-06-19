@@ -112,6 +112,8 @@ struct BinaryExprOp final {
     case Token::Not:
     case Token::Else:
     case Token::ElseIf:
+    case Token::While:
+    case Token::Do:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -230,6 +232,8 @@ private:
     case Token::Or:
     case Token::Else:
     case Token::ElseIf:
+    case Token::While:
+    case Token::Do:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -338,6 +342,8 @@ private:
       return parseReturnStmt();
     case Token::If:
       return parseIfStmt();
+    case Token::While:
+      return parseWhileStmt();
     case Token::EndOfFile:
     case Token::Invalid:
     case Token::Identifier:
@@ -357,6 +363,7 @@ private:
     case Token::Not:
     case Token::Else:
     case Token::ElseIf:
+    case Token::Do:
     case Token::Comma:
     case Token::LParen:
     case Token::RParen:
@@ -471,6 +478,32 @@ private:
     return std::make_unique<ast::IfStmt>(std::move(condition),
                                          std::move(ifBody), std::move(elseBody),
                                          source::Range{begin, end});
+  }
+
+  ast::StmtPtr parseWhileStmt() {
+    source::Position begin{TheLexer.getRange().getBegin()};
+    TheLexer.consume(Token::While);
+
+    ast::ExprPtr condition{parseExpr("after while")};
+    if (!condition) {
+      return nullptr;
+    }
+
+    if (TheLexer.getCurrent() != Token::Do) {
+      return error<ast::WhileStmt>(Token::Do, "after condition");
+    }
+    TheLexer.consume(Token::Do);
+
+    ast::CompoundStmtPtr body{
+        parseCompoundStmt("in while body", /*terminators=*/{Token::End})};
+    if (!body) {
+      return nullptr;
+    }
+    source::Position end{TheLexer.getRange().getEnd()};
+    TheLexer.consume(Token::End);
+
+    return std::make_unique<ast::WhileStmt>(
+        std::move(condition), std::move(body), source::Range{begin, end});
   }
 
   ast::FunctionDeclPtr parseFunctionDecl(llvm::StringRef context) {

@@ -1,0 +1,22 @@
+function foo(n)
+  while n do
+    n = 0
+  end
+  return n
+end
+
+-- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
+
+--      CHECK:TranslationUnit
+-- CHECK-NEXT:  FunctionDecl foo
+-- CHECK-NEXT:    ParamDecl n
+-- CHECK-NEXT:    CompoundStmt
+-- CHECK-NEXT:      WhileStmt
+-- CHECK-NEXT:        IdentifierExpr n
+-- CHECK-NEXT:        CompoundStmt
+-- CHECK-NEXT:          ExprStmt
+-- CHECK-NEXT:            BinaryExpr =
+-- CHECK-NEXT:              IdentifierExpr n
+-- CHECK-NEXT:              NumberExpr 0
+-- CHECK-NEXT:      ReturnStmt
+-- CHECK-NEXT:        IdentifierExpr n

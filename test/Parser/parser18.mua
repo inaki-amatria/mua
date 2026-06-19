@@ -1,0 +1,9 @@
+function foo(bar)
+  while bar do
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected expression in while body
+--  CHECK-NEXT:{{.*}}parser18.mua:10:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

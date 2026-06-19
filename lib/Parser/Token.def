@@ -57,6 +57,8 @@ KEYWORD(ElseIf, "elseif")
 KEYWORD(And, "and")
 KEYWORD(Or, "or")
 KEYWORD(Not, "not")
+KEYWORD(While, "while")
+KEYWORD(Do, "do")
 
 // Punctuation
 PUNCT(Equal, '=')
