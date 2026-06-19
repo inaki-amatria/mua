@@ -61,18 +61,18 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
-  std::unique_ptr<mua::ast::TranslationUnit> translationUnit{
+  std::unique_ptr<mua::ast::TranslationUnit> tu{
       mua::parser::Parse(*file, llvm::errs())};
-  if (!translationUnit) {
+  if (!tu) {
     return 3;
   }
   if (EmitAction == Action::DumpAST) {
-    mua::ast::Dump(*translationUnit, llvm::errs());
+    mua::ast::Dump(*tu, llvm::errs());
     return 0;
   }
 
   std::unique_ptr<mua::sema::Scope> scope{
-      mua::sema::Analyze(*translationUnit, llvm::errs())};
+      mua::sema::Analyze(*tu, llvm::errs())};
   if (!scope) {
     return 4;
   }
@@ -81,8 +81,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  mua::lower::IRUnit theIRUnit{
-      mua::lower::LowerToLLVMIR(*translationUnit, *scope)};
+  mua::lower::IRUnit theIRUnit{mua::lower::LowerToLLVMIR(*tu, *scope)};
   if (EmitAction == Action::DumpLLVM) {
     mua::lower::Dump(theIRUnit, llvm::errs());
     return 0;

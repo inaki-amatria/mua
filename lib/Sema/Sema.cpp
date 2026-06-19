@@ -40,43 +40,43 @@ struct AnalyzerVisitor final {
   template <typename T> bool onEnter(const T &) { return true; }
   template <typename T> void onExit(const T &) {}
 
-  bool onEnter(const ast::IdentifierExpr &id) {
-    CurrentScope->declare(Symbol::Kind::Var, id.getName());
+  bool onEnter(const ast::IdentifierExpr &ie) {
+    CurrentScope->declare(Symbol::Kind::Var, ie.getName());
     return true;
   }
 
-  bool onEnter(const ast::CallExpr &call) {
-    const Symbol *symbol{CurrentScope->lookup(call.getCallee())};
+  bool onEnter(const ast::CallExpr &ce) {
+    const Symbol *symbol{CurrentScope->lookup(ce.getCallee())};
     if (!symbol) {
-      error(call.getRange(), "use of undeclared function " + call.getCallee());
+      error(ce.getRange(), "use of undeclared function " + ce.getCallee());
       return false;
     }
     if (symbol->getKind() != Symbol::Kind::Function) {
-      error(call.getRange(),
-            "called object " + call.getCallee() + " is not a function");
+      error(ce.getRange(),
+            "called object " + ce.getCallee() + " is not a function");
       note(symbol->getName().getRange(), "previous definition is here");
       return false;
     }
-    if (call.getArgs().size() !=
+    if (ce.getArgs().size() !=
         symbol->getScope()->getSymbols(Symbol::Kind::Param).size()) {
-      error(call.getRange(), "call to function " + call.getCallee() +
-                                 " with incorrect number of arguments");
+      error(ce.getRange(), "call to function " + ce.getCallee() +
+                               " with incorrect number of arguments");
       return false;
     }
-    return llvm::all_of(call.getArgs(), [&](const ast::ExprPtr &arg) {
+    return llvm::all_of(ce.getArgs(), [&](const ast::ExprPtr &arg) {
       return checkValueExpr(*arg);
     });
   }
 
-  bool onEnter(const ast::BinaryExpr &bin) {
-    if (bin.getOp() == ast::BinaryExpr::Op::Assign) {
-      const auto *id{llvm::dyn_cast<ast::IdentifierExpr>(bin.getLHS())};
-      if (!id) {
-        error(bin.getLHS()->getRange(), "expression is not assignable");
+  bool onEnter(const ast::BinaryExpr &be) {
+    if (be.getOp() == ast::BinaryExpr::Op::Assign) {
+      const auto *ie{llvm::dyn_cast<ast::IdentifierExpr>(be.getLHS())};
+      if (!ie) {
+        error(be.getLHS()->getRange(), "expression is not assignable");
         return false;
       }
     }
-    return checkValueExpr(*bin.getLHS()) && checkValueExpr(*bin.getRHS());
+    return checkValueExpr(*be.getLHS()) && checkValueExpr(*be.getRHS());
   }
 
   bool onEnter(const ast::UnaryExpr &ue) {
@@ -135,15 +135,15 @@ struct AnalyzerVisitor final {
 
 private:
   bool checkValueExpr(const ast::Expr &expr) {
-    const auto *id{llvm::dyn_cast<ast::IdentifierExpr>(&expr)};
-    if (!id) {
+    const auto *ie{llvm::dyn_cast<ast::IdentifierExpr>(&expr)};
+    if (!ie) {
       return true;
     }
-    const Symbol *symbol{CurrentScope->lookup(id->getName())};
+    const Symbol *symbol{CurrentScope->lookup(ie->getName())};
     if (!symbol || symbol->getKind() != Symbol::Kind::Function) {
       return true;
     }
-    error(id->getRange(), "invalid use of function " + id->getName());
+    error(ie->getRange(), "invalid use of function " + ie->getName());
     note(symbol->getName().getRange(), "function declared here");
     return false;
   }
@@ -219,10 +219,10 @@ static void DumpScope(const Scope &scope, llvm::raw_ostream &os,
   os << scope << '\n';
 
   indent++;
-  for (const Symbol *sym : scope.getSymbols()) {
+  for (const Symbol *symbol : scope.getSymbols()) {
     printIndent();
-    os << *sym << '\n';
-    if (const Scope *scope{sym->getScope()}) {
+    os << *symbol << '\n';
+    if (const Scope *scope{symbol->getScope()}) {
       DumpScope(*scope, os, indent + 1);
     }
   }

@@ -207,53 +207,53 @@ private:
     return getConstant(ne.getValue());
   }
 
-  llvm::Value *lowerIdentifierExpr(const ast::IdentifierExpr &id) {
-    const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
+  llvm::Value *lowerIdentifierExpr(const ast::IdentifierExpr &ie) {
+    const sema::Symbol *symbol{CurrentScope->lookup(ie.getName())};
     return IRBuilder.CreateLoad(IRBuilder.getDoubleTy(),
                                 SymbolToValue.at(symbol), symbol->getName());
   }
 
-  llvm::Value *lowerCallExpr(const ast::CallExpr &call) {
-    llvm::Function *function{Module->getFunction(call.getCallee())};
+  llvm::Value *lowerCallExpr(const ast::CallExpr &ce) {
+    llvm::Function *function{Module->getFunction(ce.getCallee())};
     std::vector<llvm::Value *> args;
-    for (const ast::ExprPtr &arg : call.getArgs()) {
+    for (const ast::ExprPtr &arg : ce.getArgs()) {
       args.push_back(lower(*arg));
     }
     return IRBuilder.CreateCall(function, args);
   }
 
-  llvm::Value *lowerBinaryExpr(const ast::BinaryExpr &bin) {
-    switch (bin.getOp()) {
+  llvm::Value *lowerBinaryExpr(const ast::BinaryExpr &be) {
+    switch (be.getOp()) {
     case ast::BinaryExpr::Op::Assign: {
-      const auto &id{static_cast<const ast::IdentifierExpr &>(*bin.getLHS())};
-      const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
-      llvm::Value *rhs{lower(*bin.getRHS())};
+      const auto &ie{static_cast<const ast::IdentifierExpr &>(*be.getLHS())};
+      const sema::Symbol *symbol{CurrentScope->lookup(ie.getName())};
+      llvm::Value *rhs{lower(*be.getRHS())};
       IRBuilder.CreateStore(rhs, SymbolToValue.at(symbol));
       return rhs;
     }
     case ast::BinaryExpr::Op::Add:
-      return IRBuilder.CreateFAdd(lower(*bin.getLHS()), lower(*bin.getRHS()));
+      return IRBuilder.CreateFAdd(lower(*be.getLHS()), lower(*be.getRHS()));
     case ast::BinaryExpr::Op::Sub:
-      return IRBuilder.CreateFSub(lower(*bin.getLHS()), lower(*bin.getRHS()));
+      return IRBuilder.CreateFSub(lower(*be.getLHS()), lower(*be.getRHS()));
     case ast::BinaryExpr::Op::Mul:
-      return IRBuilder.CreateFMul(lower(*bin.getLHS()), lower(*bin.getRHS()));
+      return IRBuilder.CreateFMul(lower(*be.getLHS()), lower(*be.getRHS()));
     case ast::BinaryExpr::Op::Div:
-      return IRBuilder.CreateFDiv(lower(*bin.getLHS()), lower(*bin.getRHS()));
+      return IRBuilder.CreateFDiv(lower(*be.getLHS()), lower(*be.getRHS()));
     case ast::BinaryExpr::Op::Eq:
-      return lowerComparison(llvm::FCmpInst::FCMP_OEQ, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_OEQ, be);
     case ast::BinaryExpr::Op::NotEq:
-      return lowerComparison(llvm::FCmpInst::FCMP_ONE, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_ONE, be);
     case ast::BinaryExpr::Op::Lt:
-      return lowerComparison(llvm::FCmpInst::FCMP_OLT, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_OLT, be);
     case ast::BinaryExpr::Op::Gt:
-      return lowerComparison(llvm::FCmpInst::FCMP_OGT, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_OGT, be);
     case ast::BinaryExpr::Op::Le:
-      return lowerComparison(llvm::FCmpInst::FCMP_OLE, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_OLE, be);
     case ast::BinaryExpr::Op::Ge:
-      return lowerComparison(llvm::FCmpInst::FCMP_OGE, bin);
+      return lowerComparison(llvm::FCmpInst::FCMP_OGE, be);
     case ast::BinaryExpr::Op::And:
     case ast::BinaryExpr::Op::Or:
-      bool isAnd{bin.getOp() == ast::BinaryExpr::Op::And};
+      bool isAnd{be.getOp() == ast::BinaryExpr::Op::And};
 
       llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
 
@@ -263,12 +263,12 @@ private:
       llvm::BasicBlock *endBB{llvm::BasicBlock::Create(
           *LLVMContext, isAnd ? "and.end" : "or.end", function)};
 
-      llvm::Value *lhs{lower(*bin.getLHS())};
+      llvm::Value *lhs{lower(*be.getLHS())};
       IRBuilder.CreateCondBr(isTruthy(lhs), isAnd ? rhsBB : endBB,
                              isAnd ? endBB : rhsBB);
 
       IRBuilder.SetInsertPoint(rhsBB);
-      llvm::Value *rhs{lower(*bin.getRHS())};
+      llvm::Value *rhs{lower(*be.getRHS())};
       IRBuilder.CreateBr(endBB);
 
       IRBuilder.SetInsertPoint(endBB);
@@ -294,9 +294,9 @@ private:
   }
 
   llvm::Value *lowerComparison(llvm::FCmpInst::Predicate pred,
-                               const ast::BinaryExpr &bin) {
+                               const ast::BinaryExpr &be) {
     llvm::Value *cmp{
-        IRBuilder.CreateFCmp(pred, lower(*bin.getLHS()), lower(*bin.getRHS()))};
+        IRBuilder.CreateFCmp(pred, lower(*be.getLHS()), lower(*be.getRHS()))};
     return IRBuilder.CreateSelect(cmp, getConstant(1.0), getConstant(0.0));
   }
 

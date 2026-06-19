@@ -115,26 +115,26 @@ private:
     }
   }
 
-  void walkChildren(const IdentifierExpr &id) {
-    if (TheVisitor.onEnter(id)) {
-      TheVisitor.onExit(id);
+  void walkChildren(const IdentifierExpr &ie) {
+    if (TheVisitor.onEnter(ie)) {
+      TheVisitor.onExit(ie);
     }
   }
 
-  void walkChildren(const CallExpr &call) {
-    if (TheVisitor.onEnter(call)) {
-      for (const ExprPtr &arg : call.getArgs()) {
+  void walkChildren(const CallExpr &ce) {
+    if (TheVisitor.onEnter(ce)) {
+      for (const ExprPtr &arg : ce.getArgs()) {
         walk(*arg);
       }
-      TheVisitor.onExit(call);
+      TheVisitor.onExit(ce);
     }
   }
 
-  void walkChildren(const BinaryExpr &bin) {
-    if (TheVisitor.onEnter(bin)) {
-      walk(*bin.getLHS());
-      walk(*bin.getRHS());
-      TheVisitor.onExit(bin);
+  void walkChildren(const BinaryExpr &be) {
+    if (TheVisitor.onEnter(be)) {
+      walk(*be.getLHS());
+      walk(*be.getRHS());
+      TheVisitor.onExit(be);
     }
   }
 

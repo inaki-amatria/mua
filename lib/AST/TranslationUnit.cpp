@@ -42,24 +42,24 @@ struct DumpVisitor final {
     return true;
   }
 
-  bool onEnter(const IdentifierExpr &id) {
+  bool onEnter(const IdentifierExpr &ie) {
     printIndent();
-    OS << "IdentifierExpr " << id.getName() << " [" << id.getRange() << "]\n";
+    OS << "IdentifierExpr " << ie.getName() << " [" << ie.getRange() << "]\n";
     return true;
   }
 
-  bool onEnter(const CallExpr &call) {
+  bool onEnter(const CallExpr &ce) {
     printIndent();
-    OS << "CallExpr " << call.getCallee() << " [" << call.getRange() << "]\n";
+    OS << "CallExpr " << ce.getCallee() << " [" << ce.getRange() << "]\n";
     ++Level;
     return true;
   }
 
   void onExit(const CallExpr &) { --Level; }
 
-  bool onEnter(const BinaryExpr &bin) {
+  bool onEnter(const BinaryExpr &be) {
     printIndent();
-    OS << "BinaryExpr " << bin.getOp() << " [" << bin.getRange() << "]\n";
+    OS << "BinaryExpr " << be.getOp() << " [" << be.getRange() << "]\n";
     ++Level;
     return true;
   }

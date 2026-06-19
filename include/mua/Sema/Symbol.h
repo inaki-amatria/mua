@@ -97,9 +97,9 @@ struct Scope final {
   std::vector<const Symbol *>
   getSymbols(std::optional<Symbol::Kind> kind = std::nullopt) const {
     std::vector<const Symbol *> symbols;
-    for (const auto &pair : Symbols) {
-      if (!kind || pair.second.getKind() == *kind) {
-        symbols.push_back(&pair.second);
+    for (const auto &it : Symbols) {
+      if (!kind || it.second.getKind() == *kind) {
+        symbols.push_back(&it.second);
       }
     }
     llvm::sort(symbols, [](const Symbol *lhs, const Symbol *rhs) {
