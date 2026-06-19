@@ -95,6 +95,10 @@ struct AnalyzerVisitor final {
     return checkValueExpr(*is.getCondition());
   }
 
+  bool onEnter(const ast::WhileStmt &ws) {
+    return checkValueExpr(*ws.getCondition());
+  }
+
   bool onEnter(const ast::ParamDecl &pd) {
     auto [symbol,
           declared]{CurrentScope->declare(Symbol::Kind::Param, pd.getName())};
@@ -165,6 +169,9 @@ private:
             terminal = true;
           }
         }
+      }
+      if (const auto *ws{llvm::dyn_cast<ast::WhileStmt>(stmt.get())}) {
+        checkControlFlow(*ws->getBody());
       }
     }
     return terminal;

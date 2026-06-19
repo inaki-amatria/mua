@@ -1,0 +1,22 @@
+function foo()
+  while foo do
+    return 1
+    return 1
+  end
+  return 0
+end
+
+-- RUN: not %muac -emit=sema %s 2>&1 | FileCheck %s
+
+--      CHECK:error: invalid use of function foo
+-- CHECK-NEXT:{{.*}}sema08.mua:2:9-12
+-- CHECK-NEXT:  while foo do
+-- CHECK-NEXT:        ^^^
+-- CHECK-NEXT:note: function declared here
+-- CHECK-NEXT:{{.*}}sema08.mua:1:10-13
+-- CHECK-NEXT:function foo()
+-- CHECK-NEXT:         ^^^
+-- CHECK-NEXT:error: unreachable statement
+-- CHECK-NEXT:{{.*}}sema08.mua:4:5-13
+-- CHECK-NEXT:    return 1
+-- CHECK-NEXT:    ^^^^^^^^
