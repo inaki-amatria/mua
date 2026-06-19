@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "mua/AST/TranslationUnit.h"
+#include "mua/CodeGen/CodeGen.h"
 #include "mua/Lower/IRUnit.h"
 #include "mua/Lower/Lower.h"
 #include "mua/Parser/Parser.h"
@@ -35,7 +36,7 @@ static llvm::cl::opt<std::string> InputFilename{
     llvm::cl::init("-"), llvm::cl::value_desc{"filename"}};
 
 namespace {
-enum class Action { None, DumpAST, DumpSema, DumpLLVM };
+enum class Action { None, DumpAST, DumpSema, DumpLLVM, EmitObj };
 } // namespace
 
 static llvm::cl::opt<enum Action> EmitAction(
@@ -46,7 +47,9 @@ static llvm::cl::opt<enum Action> EmitAction(
     llvm::cl::values(clEnumValN(Action::DumpSema, "sema",
                                 "Emit the semantic representation")),
     llvm::cl::values(clEnumValN(Action::DumpLLVM, "llvm",
-                                "Emit the LLVM IR module")));
+                                "Emit the LLVM IR module")),
+    llvm::cl::values(clEnumValN(Action::EmitObj, "obj",
+                                "Emit the object code")));
 
 int main(int argc, char *argv[]) {
   llvm::InitLLVM initLLVM{argc, argv};
@@ -85,6 +88,13 @@ int main(int argc, char *argv[]) {
   if (EmitAction == Action::DumpLLVM) {
     mua::lower::Dump(theIRUnit, llvm::errs());
     return 0;
+  }
+
+  if (EmitAction == Action::EmitObj) {
+    std::string outputPath{llvm::formatv("{0}.o", InputFilename)};
+    bool success{mua::codegen::EmitObjectFile(*theIRUnit.Module, outputPath,
+                                              llvm::errs())};
+    return success ? 0 : 5;
   }
 
   return 0;
