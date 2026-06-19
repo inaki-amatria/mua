@@ -1,5 +1,11 @@
 function foo(bar, baz)
-  return bar < baz
+  qux = bar == baz
+  qux = bar ~= baz
+  qux = bar < baz
+  qux = bar > baz
+  qux = bar >= baz
+  qux = bar <= baz
+  return qux
 end
 
 -- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
@@ -12,9 +18,37 @@ end
 --  CHECK-NEXT:  store double %0, ptr %bar, align 8
 --  CHECK-NEXT:  %baz = alloca double, align 8
 --  CHECK-NEXT:  store double %1, ptr %baz, align 8
+--  CHECK-NEXT:  %qux = alloca double, align 8
 --  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
 --  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
---  CHECK-NEXT:  %3 = fcmp olt double %bar1, %baz2
+--  CHECK-NEXT:  %3 = fcmp oeq double %bar1, %baz2
 --  CHECK-NEXT:  %4 = select i1 %3, double 1.000000e+00, double 0.000000e+00
---  CHECK-NEXT:  ret double %4
+--  CHECK-NEXT:  store double %4, ptr %qux, align 8
+--  CHECK-NEXT:  %bar3 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz4 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %5 = fcmp one double %bar3, %baz4
+--  CHECK-NEXT:  %6 = select i1 %5, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  store double %6, ptr %qux, align 8
+--  CHECK-NEXT:  %bar5 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz6 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %7 = fcmp olt double %bar5, %baz6
+--  CHECK-NEXT:  %8 = select i1 %7, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  store double %8, ptr %qux, align 8
+--  CHECK-NEXT:  %bar7 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz8 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %9 = fcmp ogt double %bar7, %baz8
+--  CHECK-NEXT:  %10 = select i1 %9, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  store double %10, ptr %qux, align 8
+--  CHECK-NEXT:  %bar9 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz10 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %11 = fcmp oge double %bar9, %baz10
+--  CHECK-NEXT:  %12 = select i1 %11, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  store double %12, ptr %qux, align 8
+--  CHECK-NEXT:  %bar11 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %baz12 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %13 = fcmp ole double %bar11, %baz12
+--  CHECK-NEXT:  %14 = select i1 %13, double 1.000000e+00, double 0.000000e+00
+--  CHECK-NEXT:  store double %14, ptr %qux, align 8
+--  CHECK-NEXT:  %qux13 = load double, ptr %qux, align 8
+--  CHECK-NEXT:  ret double %qux13
 --  CHECK-NEXT:}

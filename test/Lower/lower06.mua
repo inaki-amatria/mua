@@ -20,9 +20,9 @@ end
 --  CHECK-NEXT:  %2 = fcmp one double %bar1, 0.000000e+00
 --  CHECK-NEXT:  br i1 %2, label %if.then, label %if.else
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then:
+--  CHECK-NEXT:if.then:                                          ; preds = %1
 --  CHECK-NEXT:  ret double 1.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.else:
+--  CHECK-NEXT:if.else:                                          ; preds = %1
 --  CHECK-NEXT:  ret double 2.000000e+00
 --  CHECK-NEXT:}

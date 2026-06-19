@@ -1,5 +1,5 @@
 function foo(bar, baz)
-  return -bar + baz
+  return -bar + not baz
 end
 
 -- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
@@ -15,6 +15,8 @@ end
 --  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
 --  CHECK-NEXT:  %3 = fneg double %bar1
 --  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
---  CHECK-NEXT:  %4 = fadd double %3, %baz2
---  CHECK-NEXT:  ret double %4
+--  CHECK-NEXT:  %4 = fcmp one double %baz2, 0.000000e+00
+--  CHECK-NEXT:  %5 = select i1 %4, double 0.000000e+00, double 1.000000e+00
+--  CHECK-NEXT:  %6 = fadd double %3, %5
+--  CHECK-NEXT:  ret double %6
 --  CHECK-NEXT:}

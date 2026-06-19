@@ -1,0 +1,33 @@
+function foo()
+  if bar then
+    baz = 42
+  else
+    baz = 17
+  end
+  return baz
+end
+
+-- RUN: %muac -emit=llvm %s 2>&1 | FileCheck %s
+
+--      CHECK:; ModuleID = 'mua module'
+--  CHECK-NEXT:source_filename = "{{.*}}lower12.mua"
+-- CHECK-EMPTY:
+--  CHECK-NEXT:define double @foo() {
+--  CHECK-NEXT:  %bar = alloca double, align 8
+--  CHECK-NEXT:  %baz = alloca double, align 8
+--  CHECK-NEXT:  %bar1 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %1 = fcmp one double %bar1, 0.000000e+00
+--  CHECK-NEXT:  br i1 %1, label %if.then, label %if.else
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.then:                                          ; preds = %0
+--  CHECK-NEXT:  store double 4.200000e+01, ptr %baz, align 8
+--  CHECK-NEXT:  br label %if.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.else:                                          ; preds = %0
+--  CHECK-NEXT:  store double 1.700000e+01, ptr %baz, align 8
+--  CHECK-NEXT:  br label %if.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.end:                                           ; preds = %if.else, %if.then
+--  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  ret double %baz2
+--  CHECK-NEXT:}

@@ -26,17 +26,17 @@ end
 --  CHECK-NEXT:  %4 = fcmp one double %a1, 0.000000e+00
 --  CHECK-NEXT:  br i1 %4, label %if.then, label %if.else
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then:
+--  CHECK-NEXT:if.then:                                          ; preds = %3
 --  CHECK-NEXT:  ret double 1.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.else:
+--  CHECK-NEXT:if.else:                                          ; preds = %3
 --  CHECK-NEXT:  %b5 = load double, ptr %b, align 8
 --  CHECK-NEXT:  %5 = fcmp one double %b5, 0.000000e+00
 --  CHECK-NEXT:  br i1 %5, label %if.then2, label %if.else3
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then2:
+--  CHECK-NEXT:if.then2:                                         ; preds = %if.else
 --  CHECK-NEXT:  ret double 2.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.else3:
+--  CHECK-NEXT:if.else3:                                         ; preds = %if.else
 --  CHECK-NEXT:  ret double 3.000000e+00
 --  CHECK-NEXT:}

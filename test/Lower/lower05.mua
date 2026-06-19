@@ -2,6 +2,9 @@ function foo(bar, baz)
   if bar and baz then
     return 1
   end
+  if bar or baz then
+    return 2
+  end
   return 0
 end
 
@@ -19,18 +22,35 @@ end
 --  CHECK-NEXT:  %3 = fcmp one double %bar1, 0.000000e+00
 --  CHECK-NEXT:  br i1 %3, label %and.rhs, label %and.end
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then:
+--  CHECK-NEXT:if.then:                                          ; preds = %and.end
 --  CHECK-NEXT:  ret double 1.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.end:
---  CHECK-NEXT:  ret double 0.000000e+00
+--  CHECK-NEXT:if.end:                                           ; preds = %and.end
+--  CHECK-NEXT:  %bar5 = load double, ptr %bar, align 8
+--  CHECK-NEXT:  %4 = fcmp one double %bar5, 0.000000e+00
+--  CHECK-NEXT:  br i1 %4, label %or.end, label %or.rhs
 -- CHECK-EMPTY:
---  CHECK-NEXT:and.rhs:
+--  CHECK-NEXT:and.rhs:                                          ; preds = %2
 --  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
 --  CHECK-NEXT:  br label %and.end
---  CHECK-EMPTY:
---  CHECK-NEXT:and.end:
---  CHECK-NEXT:  %4 = phi double [ %bar1, %2 ], [ %baz2, %and.rhs ]
---  CHECK-NEXT:  %5 = fcmp one double %4, 0.000000e+00
---  CHECK-NEXT:  br i1 %5, label %if.then, label %if.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:and.end:                                          ; preds = %and.rhs, %2
+--  CHECK-NEXT:  %5 = phi double [ %bar1, %2 ], [ %baz2, %and.rhs ]
+--  CHECK-NEXT:  %6 = fcmp one double %5, 0.000000e+00
+--  CHECK-NEXT:  br i1 %6, label %if.then, label %if.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.then3:                                         ; preds = %or.end
+--  CHECK-NEXT:  ret double 2.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.end4:                                          ; preds = %or.end
+--  CHECK-NEXT:  ret double 0.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:or.rhs:                                           ; preds = %if.end
+--  CHECK-NEXT:  %baz6 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  br label %or.end
+-- CHECK-EMPTY:
+--  CHECK-NEXT:or.end:                                           ; preds = %or.rhs, %if.end
+--  CHECK-NEXT:  %7 = phi double [ %bar5, %if.end ], [ %baz6, %or.rhs ]
+--  CHECK-NEXT:  %8 = fcmp one double %7, 0.000000e+00
+--  CHECK-NEXT:  br i1 %8, label %if.then3, label %if.end4
 --  CHECK-NEXT:}

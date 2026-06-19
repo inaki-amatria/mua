@@ -2,6 +2,7 @@ function foo(bar, baz)
   qux = bar == baz
   mux = bar ~= baz
   fux = bar > baz
+  fux = bar < baz
   bux = bar <= baz
   hux = bar >= baz
   return 0
@@ -9,11 +10,11 @@ end
 
 -- RUN: %muac -emit=ast %s 2>&1 | FileCheck %s
 
---      CHECK:TranslationUnit [{{.*}}ast04.mua:1:1-49:1]
--- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast04.mua:1:1-8:4]
+--      CHECK:TranslationUnit [{{.*}}ast04.mua:1:1-56:1]
+-- CHECK-NEXT:  FunctionDecl foo [{{.*}}ast04.mua:1:1-9:4]
 -- CHECK-NEXT:    ParamDecl bar [{{.*}}ast04.mua:1:14-17]
 -- CHECK-NEXT:    ParamDecl baz [{{.*}}ast04.mua:1:19-22]
--- CHECK-NEXT:    CompoundStmt [{{.*}}ast04.mua:2:3-8:1]
+-- CHECK-NEXT:    CompoundStmt [{{.*}}ast04.mua:2:3-9:1]
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:2:3-19]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:2:3-19]
 -- CHECK-NEXT:          IdentifierExpr qux [{{.*}}ast04.mua:2:3-6]
@@ -32,17 +33,23 @@ end
 -- CHECK-NEXT:          BinaryExpr > [{{.*}}ast04.mua:4:9-18]
 -- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast04.mua:4:9-12]
 -- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast04.mua:4:15-18]
--- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:5:3-19]
--- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:5:3-19]
--- CHECK-NEXT:          IdentifierExpr bux [{{.*}}ast04.mua:5:3-6]
--- CHECK-NEXT:          BinaryExpr <= [{{.*}}ast04.mua:5:9-19]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:5:3-18]
+-- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:5:3-18]
+-- CHECK-NEXT:          IdentifierExpr fux [{{.*}}ast04.mua:5:3-6]
+-- CHECK-NEXT:          BinaryExpr < [{{.*}}ast04.mua:5:9-18]
 -- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast04.mua:5:9-12]
--- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast04.mua:5:16-19]
+-- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast04.mua:5:15-18]
 -- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:6:3-19]
 -- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:6:3-19]
--- CHECK-NEXT:          IdentifierExpr hux [{{.*}}ast04.mua:6:3-6]
--- CHECK-NEXT:          BinaryExpr >= [{{.*}}ast04.mua:6:9-19]
+-- CHECK-NEXT:          IdentifierExpr bux [{{.*}}ast04.mua:6:3-6]
+-- CHECK-NEXT:          BinaryExpr <= [{{.*}}ast04.mua:6:9-19]
 -- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast04.mua:6:9-12]
 -- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast04.mua:6:16-19]
--- CHECK-NEXT:      ReturnStmt [{{.*}}ast04.mua:7:3-11]
--- CHECK-NEXT:        NumberExpr 0.000000e+00 [{{.*}}ast04.mua:7:10-11]
+-- CHECK-NEXT:      ExprStmt [{{.*}}ast04.mua:7:3-19]
+-- CHECK-NEXT:        BinaryExpr = [{{.*}}ast04.mua:7:3-19]
+-- CHECK-NEXT:          IdentifierExpr hux [{{.*}}ast04.mua:7:3-6]
+-- CHECK-NEXT:          BinaryExpr >= [{{.*}}ast04.mua:7:9-19]
+-- CHECK-NEXT:            IdentifierExpr bar [{{.*}}ast04.mua:7:9-12]
+-- CHECK-NEXT:            IdentifierExpr baz [{{.*}}ast04.mua:7:16-19]
+-- CHECK-NEXT:      ReturnStmt [{{.*}}ast04.mua:8:3-11]
+-- CHECK-NEXT:        NumberExpr 0.000000e+00 [{{.*}}ast04.mua:8:10-11]

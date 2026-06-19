@@ -1,0 +1,8 @@
+function foo()
+
+-- RUN: not %muac %s 2>&1 | FileCheck %s
+
+--       CHECK:error: expected expression in function body
+--  CHECK-NEXT:{{.*}}parser19.mua:9:1-1
+-- CHECK-EMPTY:
+--  CHECK-NEXT:^

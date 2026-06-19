@@ -21,14 +21,14 @@ end
 --  CHECK-NEXT:  %3 = fcmp one double %bar1, 0.000000e+00
 --  CHECK-NEXT:  br i1 %3, label %if.then, label %if.else
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then:
+--  CHECK-NEXT:if.then:                                          ; preds = %2
 --  CHECK-NEXT:  store double 1.000000e+00, ptr %baz, align 8
 --  CHECK-NEXT:  br label %if.end
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.else:
+--  CHECK-NEXT:if.else:                                          ; preds = %2
 --  CHECK-NEXT:  ret double 2.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.end:
+--  CHECK-NEXT:if.end:                                           ; preds = %if.then
 --  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
 --  CHECK-NEXT:  ret double %baz2
 --  CHECK-NEXT:}
