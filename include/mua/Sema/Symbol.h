@@ -71,13 +71,8 @@ struct Scope final {
       return {symbol, false};
     }
     Symbol *symbol{&Symbols.try_emplace(name, kind, name).first->second};
-    switch (symbol->getKind()) {
-    case Symbol::Kind::Function:
+    if (symbol->getKind() == Symbol::Kind::Function) {
       symbol->setScope(std::unique_ptr<Scope>{new Scope{this, symbol}});
-      break;
-    case Symbol::Kind::Param:
-    case Symbol::Kind::Var:
-      break;
     }
     return {symbol, true};
   }

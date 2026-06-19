@@ -100,26 +100,9 @@ struct BinaryExprOp final {
       return BinaryExprOp{ast::BinaryExpr::Op::And};
     case Token::Or:
       return BinaryExprOp{ast::BinaryExpr::Op::Or};
-    case Token::EndOfFile:
-    case Token::Invalid:
-    case Token::Identifier:
-    case Token::Number:
-    case Token::Function:
-    case Token::Return:
-    case Token::End:
-    case Token::If:
-    case Token::Then:
-    case Token::Not:
-    case Token::Else:
-    case Token::ElseIf:
-    case Token::While:
-    case Token::Do:
-    case Token::Comma:
-    case Token::LParen:
-    case Token::RParen:
+    default:
       return std::nullopt;
     }
-    MUA_COVERS_ALL_CASES;
   }
 
   ast::BinaryExpr::Op getOp() const { return Op; }
@@ -149,26 +132,7 @@ struct BinaryExprOp final {
     MUA_COVERS_ALL_CASES;
   }
 
-  bool isRightAssociative() const {
-    switch (Op) {
-    case ast::BinaryExpr::Op::Assign:
-      return true;
-    case ast::BinaryExpr::Op::And:
-    case ast::BinaryExpr::Op::Or:
-    case ast::BinaryExpr::Op::Eq:
-    case ast::BinaryExpr::Op::NotEq:
-    case ast::BinaryExpr::Op::Le:
-    case ast::BinaryExpr::Op::Ge:
-    case ast::BinaryExpr::Op::Lt:
-    case ast::BinaryExpr::Op::Gt:
-    case ast::BinaryExpr::Op::Add:
-    case ast::BinaryExpr::Op::Sub:
-    case ast::BinaryExpr::Op::Mul:
-    case ast::BinaryExpr::Op::Div:
-      return false;
-    }
-    MUA_COVERS_ALL_CASES;
-  }
+  bool isRightAssociative() const { return Op == ast::BinaryExpr::Op::Assign; }
 
 private:
   BinaryExprOp(ast::BinaryExpr::Op op) : Op{op} {}
@@ -214,35 +178,9 @@ private:
       return parseUnaryExpr(ast::UnaryExpr::Op::Neg, context);
     case Token::Not:
       return parseUnaryExpr(ast::UnaryExpr::Op::Not, context);
-    case Token::EndOfFile:
-    case Token::Invalid:
-    case Token::Function:
-    case Token::Return:
-    case Token::End:
-    case Token::If:
-    case Token::Then:
-    case Token::Equal:
-    case Token::EqualEqual:
-    case Token::NotEqual:
-    case Token::LessOrEqual:
-    case Token::GreaterOrEqual:
-    case Token::LessThan:
-    case Token::GreaterThan:
-    case Token::And:
-    case Token::Or:
-    case Token::Else:
-    case Token::ElseIf:
-    case Token::While:
-    case Token::Do:
-    case Token::Comma:
-    case Token::LParen:
-    case Token::RParen:
-    case Token::Plus:
-    case Token::Star:
-    case Token::Slash:
+    default:
       return error<ast::Expr>(Expected::Kind::Expr, context);
     }
-    MUA_COVERS_ALL_CASES;
   }
 
   ast::ExprPtr parseNumberExpr(llvm::StringRef context) {
@@ -344,36 +282,9 @@ private:
       return parseIfStmt();
     case Token::While:
       return parseWhileStmt();
-    case Token::EndOfFile:
-    case Token::Invalid:
-    case Token::Identifier:
-    case Token::Number:
-    case Token::Function:
-    case Token::End:
-    case Token::Then:
-    case Token::Equal:
-    case Token::EqualEqual:
-    case Token::NotEqual:
-    case Token::LessOrEqual:
-    case Token::GreaterOrEqual:
-    case Token::LessThan:
-    case Token::GreaterThan:
-    case Token::And:
-    case Token::Or:
-    case Token::Not:
-    case Token::Else:
-    case Token::ElseIf:
-    case Token::Do:
-    case Token::Comma:
-    case Token::LParen:
-    case Token::RParen:
-    case Token::Plus:
-    case Token::Minus:
-    case Token::Star:
-    case Token::Slash:
+    default:
       return parseExprStmt(context);
     }
-    MUA_COVERS_ALL_CASES;
   }
 
   ast::StmtPtr parseExprStmt(llvm::StringRef context) {

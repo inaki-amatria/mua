@@ -33,32 +33,6 @@
 using namespace mua;
 using namespace mua::lower;
 
-static llvm::FCmpInst::Predicate ToFCmpInstPredicate(ast::BinaryExpr::Op op) {
-  switch (op) {
-  case ast::BinaryExpr::Op::Eq:
-    return llvm::FCmpInst::FCMP_OEQ;
-  case ast::BinaryExpr::Op::NotEq:
-    return llvm::FCmpInst::FCMP_ONE;
-  case ast::BinaryExpr::Op::Lt:
-    return llvm::FCmpInst::FCMP_OLT;
-  case ast::BinaryExpr::Op::Gt:
-    return llvm::FCmpInst::FCMP_OGT;
-  case ast::BinaryExpr::Op::Le:
-    return llvm::FCmpInst::FCMP_OLE;
-  case ast::BinaryExpr::Op::Ge:
-    return llvm::FCmpInst::FCMP_OGE;
-  case ast::BinaryExpr::Op::Assign:
-  case ast::BinaryExpr::Op::Add:
-  case ast::BinaryExpr::Op::Sub:
-  case ast::BinaryExpr::Op::Mul:
-  case ast::BinaryExpr::Op::Div:
-  case ast::BinaryExpr::Op::And:
-  case ast::BinaryExpr::Op::Or:
-    break;
-  }
-  MUA_COVERS_ALL_CASES;
-}
-
 namespace {
 
 struct LowerToLLVMIRVisitor final {
@@ -195,101 +169,17 @@ struct LowerToLLVMIRVisitor final {
 private:
   llvm::Value *lower(const ast::Expr &expr) {
     switch (expr.getKind()) {
-    case ast::Node::Kind::NumberExpr: {
-      const auto &ne{static_cast<const ast::NumberExpr &>(expr)};
-      return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), ne.getValue());
-    }
-    case ast::Node::Kind::IdentifierExpr: {
-      const auto &id{static_cast<const ast::IdentifierExpr &>(expr)};
-      const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
-      return IRBuilder.CreateLoad(IRBuilder.getDoubleTy(),
-                                  SymbolToValue.at(symbol), symbol->getName());
-    }
-    case ast::Node::Kind::CallExpr: {
-      const auto &call{static_cast<const ast::CallExpr &>(expr)};
-      llvm::Function *function{Module->getFunction(call.getCallee())};
-      std::vector<llvm::Value *> args;
-      for (const ast::ExprPtr &arg : call.getArgs()) {
-        args.push_back(lower(*arg));
-      }
-      return IRBuilder.CreateCall(function, args);
-    }
-    case ast::Node::Kind::BinaryExpr: {
-      const auto &bin{static_cast<const ast::BinaryExpr &>(expr)};
-      if (bin.getOp() == ast::BinaryExpr::Op::Assign) {
-        const auto &id{static_cast<const ast::IdentifierExpr &>(*bin.getLHS())};
-        const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
-        llvm::Value *lhs{SymbolToValue.at(symbol)};
-        llvm::Value *rhs{lower(*bin.getRHS())};
-        IRBuilder.CreateStore(rhs, lhs);
-        return rhs;
-      }
-      if (bin.getOp() == ast::BinaryExpr::Op::And ||
-          bin.getOp() == ast::BinaryExpr::Op::Or) {
-        bool isAnd{bin.getOp() == ast::BinaryExpr::Op::And};
-        llvm::Value *lhs{lower(*bin.getLHS())};
-        llvm::BasicBlock *condBB{IRBuilder.GetInsertBlock()};
-        llvm::Function *fn{condBB->getParent()};
-        llvm::BasicBlock *rhsBB{llvm::BasicBlock::Create(
-            *LLVMContext, isAnd ? "and.rhs" : "or.rhs", fn)};
-        llvm::BasicBlock *endBB{llvm::BasicBlock::Create(
-            *LLVMContext, isAnd ? "and.end" : "or.end", fn)};
-        IRBuilder.CreateCondBr(isTruthy(lhs), isAnd ? rhsBB : endBB,
-                               isAnd ? endBB : rhsBB);
-        IRBuilder.SetInsertPoint(rhsBB);
-        llvm::Value *rhs{lower(*bin.getRHS())};
-        IRBuilder.CreateBr(endBB);
-        IRBuilder.SetInsertPoint(endBB);
-        llvm::PHINode *phi{IRBuilder.CreatePHI(IRBuilder.getDoubleTy(), 2)};
-        phi->addIncoming(lhs, condBB);
-        phi->addIncoming(rhs, rhsBB);
-        return phi;
-      }
-      llvm::Value *lhs{lower(*bin.getLHS())};
-      llvm::Value *rhs{lower(*bin.getRHS())};
-      switch (bin.getOp()) {
-      case ast::BinaryExpr::Op::Add:
-        return IRBuilder.CreateFAdd(lhs, rhs);
-      case ast::BinaryExpr::Op::Sub:
-        return IRBuilder.CreateFSub(lhs, rhs);
-      case ast::BinaryExpr::Op::Mul:
-        return IRBuilder.CreateFMul(lhs, rhs);
-      case ast::BinaryExpr::Op::Div:
-        return IRBuilder.CreateFDiv(lhs, rhs);
-      case ast::BinaryExpr::Op::Eq:
-      case ast::BinaryExpr::Op::NotEq:
-      case ast::BinaryExpr::Op::Le:
-      case ast::BinaryExpr::Op::Ge:
-      case ast::BinaryExpr::Op::Lt:
-      case ast::BinaryExpr::Op::Gt: {
-        llvm::FCmpInst::Predicate pred{ToFCmpInstPredicate(bin.getOp())};
-        llvm::Value *cmp{IRBuilder.CreateFCmp(pred, lhs, rhs)};
-        return IRBuilder.CreateSelect(
-            cmp, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0),
-            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
-      }
-      case ast::BinaryExpr::Op::Assign:
-      case ast::BinaryExpr::Op::And:
-      case ast::BinaryExpr::Op::Or:
-        break;
-      }
-      MUA_COVERS_ALL_CASES;
-    }
-    case ast::Node::Kind::UnaryExpr: {
-      const auto &ue{static_cast<const ast::UnaryExpr &>(expr)};
-      switch (ue.getOp()) {
-      case mua::ast::UnaryExpr::Op::Neg:
-        return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
-      case mua::ast::UnaryExpr::Op::Not: {
-        llvm::Value *operand{lower(*ue.getOperand())};
-        return IRBuilder.CreateSelect(
-            isTruthy(operand),
-            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0),
-            llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0));
-      }
-      }
-      MUA_COVERS_ALL_CASES;
-    }
+    case ast::Node::Kind::NumberExpr:
+      return lowerNumberExpr(static_cast<const ast::NumberExpr &>(expr));
+    case ast::Node::Kind::IdentifierExpr:
+      return lowerIdentifierExpr(
+          static_cast<const ast::IdentifierExpr &>(expr));
+    case ast::Node::Kind::CallExpr:
+      return lowerCallExpr(static_cast<const ast::CallExpr &>(expr));
+    case ast::Node::Kind::BinaryExpr:
+      return lowerBinaryExpr(static_cast<const ast::BinaryExpr &>(expr));
+    case ast::Node::Kind::UnaryExpr:
+      return lowerUnaryExpr(static_cast<const ast::UnaryExpr &>(expr));
     case ast::Node::Kind::ExprStmt:
     case ast::Node::Kind::ReturnStmt:
     case ast::Node::Kind::CompoundStmt:
@@ -301,6 +191,106 @@ private:
       break;
     }
     MUA_COVERS_ALL_CASES;
+  }
+
+  llvm::Value *lowerNumberExpr(const ast::NumberExpr &ne) {
+    return llvm::ConstantFP::get(IRBuilder.getDoubleTy(), ne.getValue());
+  }
+
+  llvm::Value *lowerIdentifierExpr(const ast::IdentifierExpr &id) {
+    const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
+    return IRBuilder.CreateLoad(IRBuilder.getDoubleTy(),
+                                SymbolToValue.at(symbol), symbol->getName());
+  }
+
+  llvm::Value *lowerCallExpr(const ast::CallExpr &call) {
+    llvm::Function *function{Module->getFunction(call.getCallee())};
+    std::vector<llvm::Value *> args;
+    for (const ast::ExprPtr &arg : call.getArgs()) {
+      args.push_back(lower(*arg));
+    }
+    return IRBuilder.CreateCall(function, args);
+  }
+
+  llvm::Value *lowerBinaryExpr(const ast::BinaryExpr &bin) {
+    switch (bin.getOp()) {
+    case ast::BinaryExpr::Op::Assign: {
+      const auto &id{static_cast<const ast::IdentifierExpr &>(*bin.getLHS())};
+      const sema::Symbol *symbol{CurrentScope->lookup(id.getName())};
+      llvm::Value *rhs{lower(*bin.getRHS())};
+      IRBuilder.CreateStore(rhs, SymbolToValue.at(symbol));
+      return rhs;
+    }
+    case ast::BinaryExpr::Op::Add:
+      return IRBuilder.CreateFAdd(lower(*bin.getLHS()), lower(*bin.getRHS()));
+    case ast::BinaryExpr::Op::Sub:
+      return IRBuilder.CreateFSub(lower(*bin.getLHS()), lower(*bin.getRHS()));
+    case ast::BinaryExpr::Op::Mul:
+      return IRBuilder.CreateFMul(lower(*bin.getLHS()), lower(*bin.getRHS()));
+    case ast::BinaryExpr::Op::Div:
+      return IRBuilder.CreateFDiv(lower(*bin.getLHS()), lower(*bin.getRHS()));
+    case ast::BinaryExpr::Op::Eq:
+      return lowerComparison(llvm::FCmpInst::FCMP_OEQ, bin);
+    case ast::BinaryExpr::Op::NotEq:
+      return lowerComparison(llvm::FCmpInst::FCMP_ONE, bin);
+    case ast::BinaryExpr::Op::Lt:
+      return lowerComparison(llvm::FCmpInst::FCMP_OLT, bin);
+    case ast::BinaryExpr::Op::Gt:
+      return lowerComparison(llvm::FCmpInst::FCMP_OGT, bin);
+    case ast::BinaryExpr::Op::Le:
+      return lowerComparison(llvm::FCmpInst::FCMP_OLE, bin);
+    case ast::BinaryExpr::Op::Ge:
+      return lowerComparison(llvm::FCmpInst::FCMP_OGE, bin);
+    case ast::BinaryExpr::Op::And:
+    case ast::BinaryExpr::Op::Or:
+      bool isAnd{bin.getOp() == ast::BinaryExpr::Op::And};
+      llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
+
+      llvm::BasicBlock *condBB{IRBuilder.GetInsertBlock()};
+      llvm::BasicBlock *rhsBB{llvm::BasicBlock::Create(
+          *LLVMContext, isAnd ? "and.rhs" : "or.rhs", function)};
+      llvm::BasicBlock *endBB{llvm::BasicBlock::Create(
+          *LLVMContext, isAnd ? "and.end" : "or.end", function)};
+
+      llvm::Value *lhs{lower(*bin.getLHS())};
+      IRBuilder.CreateCondBr(isTruthy(lhs), isAnd ? rhsBB : endBB,
+                             isAnd ? endBB : rhsBB);
+
+      IRBuilder.SetInsertPoint(rhsBB);
+      llvm::Value *rhs{lower(*bin.getRHS())};
+      IRBuilder.CreateBr(endBB);
+
+      IRBuilder.SetInsertPoint(endBB);
+      llvm::PHINode *phi{IRBuilder.CreatePHI(IRBuilder.getDoubleTy(), 2)};
+      phi->addIncoming(lhs, condBB);
+      phi->addIncoming(rhs, rhsBB);
+
+      return phi;
+    }
+    MUA_COVERS_ALL_CASES;
+  }
+
+  llvm::Value *lowerUnaryExpr(const ast::UnaryExpr &ue) {
+    switch (ue.getOp()) {
+    case mua::ast::UnaryExpr::Op::Neg:
+      return IRBuilder.CreateFNeg(lower(*ue.getOperand()));
+    case mua::ast::UnaryExpr::Op::Not:
+      llvm::Value *operand{lower(*ue.getOperand())};
+      return IRBuilder.CreateSelect(
+          isTruthy(operand),
+          llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0),
+          llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0));
+    }
+    MUA_COVERS_ALL_CASES;
+  }
+
+  llvm::Value *lowerComparison(llvm::FCmpInst::Predicate pred,
+                               const ast::BinaryExpr &bin) {
+    llvm::Value *cmp{
+        IRBuilder.CreateFCmp(pred, lower(*bin.getLHS()), lower(*bin.getRHS()))};
+    return IRBuilder.CreateSelect(
+        cmp, llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 1.0),
+        llvm::ConstantFP::get(IRBuilder.getDoubleTy(), 0.0));
   }
 
   llvm::Value *isTruthy(llvm::Value *value) {
