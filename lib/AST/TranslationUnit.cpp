@@ -111,6 +111,15 @@ struct DumpVisitor final {
 
   void onExit(const IfStmt &) { --Level; }
 
+  bool onEnter(const WhileStmt &ws) {
+    printIndent();
+    OS << "WhileStmt [" << ws.getRange() << "]\n";
+    ++Level;
+    return true;
+  }
+
+  void onExit(const WhileStmt &) { --Level; }
+
   bool onEnter(const ParamDecl &pd) {
     printIndent();
     OS << "ParamDecl " << pd.getName() << " [" << pd.getRange() << "]\n";

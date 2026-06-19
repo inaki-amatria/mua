@@ -104,6 +104,22 @@ private:
   CompoundStmtPtr ElseBody;
 };
 
+/// Statement representing a while loop
+struct WhileStmt final : public Stmt {
+  WhileStmt(ExprPtr condition, CompoundStmtPtr body, source::Range range)
+      : Stmt{Kind::WhileStmt, range}, Condition{std::move(condition)},
+        Body{std::move(body)} {}
+
+  const Expr *getCondition() const { return Condition.get(); }
+  const CompoundStmt *getBody() const { return Body.get(); }
+
+  static bool classof(const Node *n) { return n->getKind() == Kind::WhileStmt; }
+
+private:
+  ExprPtr Condition;
+  CompoundStmtPtr Body;
+};
+
 } // namespace mua::ast
 
 #endif // MUA_AST_STMT_H

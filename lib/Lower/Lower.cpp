@@ -270,6 +270,7 @@ private:
     case ast::Node::Kind::ReturnStmt:
     case ast::Node::Kind::CompoundStmt:
     case ast::Node::Kind::IfStmt:
+    case ast::Node::Kind::WhileStmt:
     case ast::Node::Kind::ParamDecl:
     case ast::Node::Kind::FunctionDecl:
     case ast::Node::Kind::TranslationUnit:

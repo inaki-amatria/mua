@@ -81,6 +81,9 @@ template <typename Visitor> struct Walker final {
     case Node::Kind::IfStmt:
       walkChildren(static_cast<const IfStmt &>(n));
       break;
+    case Node::Kind::WhileStmt:
+      walkChildren(static_cast<const WhileStmt &>(n));
+      break;
     case Node::Kind::ParamDecl:
       walkChildren(static_cast<const ParamDecl &>(n));
       break;
@@ -173,6 +176,14 @@ private:
         walk(*elseBody);
       }
       TheVisitor.onExit(is);
+    }
+  }
+
+  void walkChildren(const WhileStmt &ws) {
+    if (TheVisitor.onEnter(ws)) {
+      walk(*ws.getCondition());
+      walk(*ws.getBody());
+      TheVisitor.onExit(ws);
     }
   }
 

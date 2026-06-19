@@ -45,7 +45,8 @@ struct Node {
     ReturnStmt,
     CompoundStmt,
     IfStmt,
-    LastStmt = IfStmt,
+    WhileStmt,
+    LastStmt = WhileStmt,
 
     // Declarations
     FirstDecl,
