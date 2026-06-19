@@ -32,16 +32,6 @@
 using namespace mua;
 using namespace mua::parser;
 
-static Token ToToken(ast::UnaryExpr::Op op) {
-  switch (op) {
-  case ast::UnaryExpr::Op::Neg:
-    return Token::Minus;
-  case ast::UnaryExpr::Op::Not:
-    return Token::Not;
-  }
-  MUA_COVERS_ALL_CASES;
-}
-
 namespace {
 
 struct Expected final {
@@ -169,15 +159,16 @@ private:
   }
 
   ast::ExprPtr parsePrimaryExpr(llvm::StringRef context) {
-    switch (TheLexer.getCurrent()) {
+    Token token{TheLexer.getCurrent()};
+    switch (token) {
     case Token::Number:
       return parseNumberExpr(context);
     case Token::Identifier:
       return parseIdentifierOrCallExpr();
     case Token::Minus:
-      return parseUnaryExpr(ast::UnaryExpr::Op::Neg, context);
+      return parseUnaryExpr(token, ast::UnaryExpr::Op::Neg, context);
     case Token::Not:
-      return parseUnaryExpr(ast::UnaryExpr::Op::Not, context);
+      return parseUnaryExpr(token, ast::UnaryExpr::Op::Not, context);
     default:
       return error<ast::Expr>(Expected::Kind::Expr, context);
     }
@@ -226,9 +217,10 @@ private:
         name, std::move(args), source::Range{name.getRange().getBegin(), end});
   }
 
-  ast::ExprPtr parseUnaryExpr(ast::UnaryExpr::Op op, llvm::StringRef context) {
+  ast::ExprPtr parseUnaryExpr(Token token, ast::UnaryExpr::Op op,
+                              llvm::StringRef context) {
     source::Position begin{TheLexer.getRange().getBegin()};
-    TheLexer.consume(ToToken(op));
+    TheLexer.consume(token);
 
     ast::ExprPtr operand{parsePrimaryExpr(context)};
     if (!operand) {
