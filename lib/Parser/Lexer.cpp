@@ -87,25 +87,25 @@ Token Lexer::lex() {
   }
 
   // Multi-character operators
-  if (peek() == '=' && peek(1) == '=') {
+  if (peek() == '=' && peek(/*lookahead=*/1) == '=') {
     advance();
     advance();
     Range = makeRange(begin, getOffset());
     return Token::EqualEqual;
   }
-  if (peek() == '~' && peek(1) == '=') {
+  if (peek() == '~' && peek(/*lookahead=*/1) == '=') {
     advance();
     advance();
     Range = makeRange(begin, getOffset());
     return Token::NotEqual;
   }
-  if (peek() == '<' && peek(1) == '=') {
+  if (peek() == '<' && peek(/*lookahead=*/1) == '=') {
     advance();
     advance();
     Range = makeRange(begin, getOffset());
     return Token::LessOrEqual;
   }
-  if (peek() == '>' && peek(1) == '=') {
+  if (peek() == '>' && peek(/*lookahead=*/1) == '=') {
     advance();
     advance();
     Range = makeRange(begin, getOffset());
