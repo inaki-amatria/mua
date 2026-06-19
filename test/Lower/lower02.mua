@@ -20,16 +20,16 @@ end
 --  CHECK-NEXT:  br i1 %1, label %if.then, label %if.end
 -- CHECK-EMPTY:
 --  CHECK-NEXT:if.then:                                          ; preds = %0
---  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
---  CHECK-NEXT:  %2 = fcmp one double %baz2, 0.000000e+00
---  CHECK-NEXT:  br i1 %2, label %if.then3, label %if.end4
+--  CHECK-NEXT:  %baz4 = load double, ptr %baz, align 8
+--  CHECK-NEXT:  %2 = fcmp one double %baz4, 0.000000e+00
+--  CHECK-NEXT:  br i1 %2, label %if.then2, label %if.end3
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.end:                                           ; preds = %if.end4, %0
+--  CHECK-NEXT:if.end:                                           ; preds = %if.end3, %0
 --  CHECK-NEXT:  ret double 4.200000e+01
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then3:                                         ; preds = %if.then
+--  CHECK-NEXT:if.then2:                                         ; preds = %if.then
 --  CHECK-NEXT:  ret double 1.700000e+01
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.end4:                                          ; preds = %if.then
+--  CHECK-NEXT:if.end3:                                          ; preds = %if.then
 --  CHECK-NEXT:  br label %if.end
 --  CHECK-NEXT:}

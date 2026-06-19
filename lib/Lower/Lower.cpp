@@ -55,8 +55,8 @@ struct LowerToLLVMIRVisitor final {
   }
 
   bool onEnter(const ast::IfStmt &is) {
-    llvm::Value *condition{lower(*is.getCondition())};
     llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
+
     llvm::BasicBlock *thenBB{
         llvm::BasicBlock::Create(*LLVMContext, "if.then", function)};
     llvm::BasicBlock *elseBB{nullptr};
@@ -66,6 +66,7 @@ struct LowerToLLVMIRVisitor final {
     llvm::BasicBlock *mergeBB{
         llvm::BasicBlock::Create(*LLVMContext, "if.end", function)};
 
+    llvm::Value *condition{lower(*is.getCondition())};
     IRBuilder.CreateCondBr(isTruthy(condition), thenBB,
                            is.getElseBody() ? elseBB : mergeBB);
 
@@ -97,6 +98,7 @@ struct LowerToLLVMIRVisitor final {
 
   bool onEnter(const ast::WhileStmt &ws) {
     llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
+
     llvm::BasicBlock *condBB{
         llvm::BasicBlock::Create(*LLVMContext, "while.cond", function)};
     llvm::BasicBlock *bodyBB{
@@ -105,6 +107,7 @@ struct LowerToLLVMIRVisitor final {
         llvm::BasicBlock::Create(*LLVMContext, "while.end", function)};
 
     IRBuilder.CreateBr(condBB);
+
     IRBuilder.SetInsertPoint(condBB);
     llvm::Value *condition{lower(*ws.getCondition())};
     IRBuilder.CreateCondBr(isTruthy(condition), bodyBB, mergeBB);
@@ -116,23 +119,28 @@ struct LowerToLLVMIRVisitor final {
     }
 
     IRBuilder.SetInsertPoint(mergeBB);
+
     return false;
   }
 
   bool onEnter(const ast::FunctionDecl &fn) {
     const sema::Symbol *symbol{CurrentScope->lookup(fn.getName())};
     const sema::Scope *scope{symbol->getScope()};
+
     std::vector<const sema::Symbol *> params{
         scope->getSymbols(sema::Symbol::Kind::Param)};
     std::vector<llvm::Type *> paramTys{params.size(), IRBuilder.getDoubleTy()};
+
     llvm::FunctionType *functionTy{
         llvm::FunctionType::get(IRBuilder.getDoubleTy(), paramTys,
                                 /*isVarArg=*/false)};
     llvm::Function *function{
         llvm::Function::Create(functionTy, llvm::Function::ExternalLinkage,
                                symbol->getName(), *Module)};
+
     llvm::BasicBlock::Create(*LLVMContext,
                              /*Name=*/"", function);
+
     IRBuilder.SetInsertPoint(&function->getEntryBlock());
     for (auto [symbol, arg] : llvm::zip_equal(params, function->args())) {
       llvm::AllocaInst *alloca{IRBuilder.CreateAlloca(
@@ -146,7 +154,9 @@ struct LowerToLLVMIRVisitor final {
           IRBuilder.getDoubleTy(), nullptr, symbol->getName())};
       SymbolToValue[symbol] = alloca;
     }
+
     CurrentScope = scope;
+
     return true;
   }
 
@@ -244,6 +254,7 @@ private:
     case ast::BinaryExpr::Op::And:
     case ast::BinaryExpr::Op::Or:
       bool isAnd{bin.getOp() == ast::BinaryExpr::Op::And};
+
       llvm::Function *function{IRBuilder.GetInsertBlock()->getParent()};
 
       llvm::BasicBlock *condBB{IRBuilder.GetInsertBlock()};

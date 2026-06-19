@@ -19,6 +19,12 @@ end
 --  CHECK-NEXT:  %3 = fcmp one double %bar1, 0.000000e+00
 --  CHECK-NEXT:  br i1 %3, label %and.rhs, label %and.end
 -- CHECK-EMPTY:
+--  CHECK-NEXT:if.then:
+--  CHECK-NEXT:  ret double 1.000000e+00
+-- CHECK-EMPTY:
+--  CHECK-NEXT:if.end:
+--  CHECK-NEXT:  ret double 0.000000e+00
+-- CHECK-EMPTY:
 --  CHECK-NEXT:and.rhs:
 --  CHECK-NEXT:  %baz2 = load double, ptr %baz, align 8
 --  CHECK-NEXT:  br label %and.end
@@ -27,10 +33,4 @@ end
 --  CHECK-NEXT:  %4 = phi double [ %bar1, %2 ], [ %baz2, %and.rhs ]
 --  CHECK-NEXT:  %5 = fcmp one double %4, 0.000000e+00
 --  CHECK-NEXT:  br i1 %5, label %if.then, label %if.end
--- CHECK-EMPTY:
---  CHECK-NEXT:if.then:
---  CHECK-NEXT:  ret double 1.000000e+00
--- CHECK-EMPTY:
---  CHECK-NEXT:if.end:
---  CHECK-NEXT:  ret double 0.000000e+00
 --  CHECK-NEXT:}

@@ -30,13 +30,13 @@ end
 --  CHECK-NEXT:  ret double 1.000000e+00
 -- CHECK-EMPTY:
 --  CHECK-NEXT:if.else:
---  CHECK-NEXT:  %b2 = load double, ptr %b, align 8
---  CHECK-NEXT:  %5 = fcmp one double %b2, 0.000000e+00
---  CHECK-NEXT:  br i1 %5, label %if.then3, label %if.else4
+--  CHECK-NEXT:  %b5 = load double, ptr %b, align 8
+--  CHECK-NEXT:  %5 = fcmp one double %b5, 0.000000e+00
+--  CHECK-NEXT:  br i1 %5, label %if.then2, label %if.else3
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.then3:
+--  CHECK-NEXT:if.then2:
 --  CHECK-NEXT:  ret double 2.000000e+00
 -- CHECK-EMPTY:
---  CHECK-NEXT:if.else4:
+--  CHECK-NEXT:if.else3:
 --  CHECK-NEXT:  ret double 3.000000e+00
 --  CHECK-NEXT:}
