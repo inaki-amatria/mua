@@ -44,7 +44,7 @@ struct Lexer final {
 
   /// Consume the expected Token, assert if mismatch, then advance
   void consume(Token token) {
-    assert(TheToken == token);
+    assert(getCurrent() == token);
     next();
   }
 
