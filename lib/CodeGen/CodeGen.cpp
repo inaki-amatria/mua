@@ -32,8 +32,7 @@
 using namespace mua;
 using namespace mua::codegen;
 
-bool mua::codegen::EmitObjectFile(llvm::Module &module,
-                                  llvm::StringRef outputPath,
+bool mua::codegen::EmitObjectFile(llvm::Module &mod, llvm::StringRef outputPath,
                                   llvm::raw_ostream &os) {
   llvm::InitializeAllTargetInfos();
   llvm::InitializeAllTargets();
@@ -43,7 +42,7 @@ bool mua::codegen::EmitObjectFile(llvm::Module &module,
 
   // Detect the host target
   llvm::Triple targetTriple{llvm::sys::getDefaultTargetTriple()};
-  module.setTargetTriple(targetTriple);
+  mod.setTargetTriple(targetTriple);
 
   // Look up the target
   std::string errorMsg;
@@ -62,7 +61,7 @@ bool mua::codegen::EmitObjectFile(llvm::Module &module,
                                   llvm::Reloc::PIC_)};
 
   // Set the data layout
-  module.setDataLayout(targetMachine->createDataLayout());
+  mod.setDataLayout(targetMachine->createDataLayout());
 
   // Open the output file
   std::error_code ec;
@@ -81,7 +80,7 @@ bool mua::codegen::EmitObjectFile(llvm::Module &module,
     return false;
   }
 
-  pm.run(module);
+  pm.run(mod);
 
   return true;
 }
