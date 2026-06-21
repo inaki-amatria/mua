@@ -25,6 +25,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/TargetParser/Host.h"
@@ -72,14 +73,32 @@ bool mua::codegen::EmitObjectFile(llvm::Module &mod, llvm::StringRef outputPath,
     return false;
   }
 
-  // Set up the pass manager and add codegen passes
+  // ModulePassManager is for IR optimizations
+  llvm::PassBuilder pb{targetMachine.get()};
+
+  llvm::LoopAnalysisManager lam;
+  llvm::FunctionAnalysisManager fam;
+  llvm::CGSCCAnalysisManager cgam;
+  llvm::ModuleAnalysisManager mam;
+
+  pb.registerLoopAnalyses(lam);
+  pb.registerFunctionAnalyses(fam);
+  pb.registerCGSCCAnalyses(cgam);
+  pb.registerModuleAnalyses(mam);
+
+  pb.crossRegisterProxies(lam, fam, cgam, mam);
+
+  llvm::ModulePassManager mpm{
+      pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O2)};
+  mpm.run(mod, mam);
+
+  // PassManager is for codegen
   llvm::legacy::PassManager pm;
   if (targetMachine->addPassesToEmitFile(pm, outputFile, /*DwoOut=*/nullptr,
                                          llvm::CodeGenFileType::ObjectFile)) {
     os << "error: target does not support this file type\n";
     return false;
   }
-
   pm.run(mod);
 
   return true;
