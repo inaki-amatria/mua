@@ -32,8 +32,8 @@ function factorial(n)
 end
 ```
 
-Supports functions, variables, `if`/`elseif`/`else`, arithmetic, comparisons,
-and logical operators (`and`, `or`, `not`).
+Supports functions, variables, `if`/`elseif`/`else`, `while`, arithmetic,
+comparisons, and logical operators (`and`, `or`, `not`).
 
 ## Build
 
