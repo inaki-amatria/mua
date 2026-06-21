@@ -31,9 +31,12 @@ class raw_ostream;
 
 namespace mua::codegen {
 
+enum class OptimizationLevel { O0, O1, O2, O3 };
+
 /// Emit object code from a Module. On error, returns false and reports
 /// diagnostics to the provided output stream
-bool EmitObjectFile(llvm::Module &, llvm::StringRef, llvm::raw_ostream &);
+bool EmitObjectFile(llvm::Module &, OptimizationLevel, llvm::StringRef,
+                    llvm::raw_ostream &);
 
 } // namespace mua::codegen
 

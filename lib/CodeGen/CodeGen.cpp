@@ -22,6 +22,7 @@
 
 #include "mua/CodeGen/CodeGen.h"
 
+#include "mua/Support/ErrorHandling.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -33,7 +34,22 @@
 using namespace mua;
 using namespace mua::codegen;
 
-bool mua::codegen::EmitObjectFile(llvm::Module &mod, llvm::StringRef outputPath,
+static llvm::OptimizationLevel ToLLVMOptLevel(OptimizationLevel level) {
+  switch (level) {
+  case OptimizationLevel::O0:
+    return llvm::OptimizationLevel::O0;
+  case OptimizationLevel::O1:
+    return llvm::OptimizationLevel::O1;
+  case OptimizationLevel::O2:
+    return llvm::OptimizationLevel::O2;
+  case OptimizationLevel::O3:
+    return llvm::OptimizationLevel::O3;
+  }
+  MUA_COVERS_ALL_CASES;
+}
+
+bool mua::codegen::EmitObjectFile(llvm::Module &mod, OptimizationLevel optLevel,
+                                  llvm::StringRef outputPath,
                                   llvm::raw_ostream &os) {
   llvm::InitializeAllTargetInfos();
   llvm::InitializeAllTargets();
@@ -89,7 +105,7 @@ bool mua::codegen::EmitObjectFile(llvm::Module &mod, llvm::StringRef outputPath,
   pb.crossRegisterProxies(lam, fam, cgam, mam);
 
   llvm::ModulePassManager mpm{
-      pb.buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O2)};
+      pb.buildPerModuleDefaultPipeline(ToLLVMOptLevel(optLevel))};
   mpm.run(mod, mam);
 
   // PassManager is for codegen

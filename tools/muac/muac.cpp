@@ -35,6 +35,11 @@ static llvm::cl::opt<std::string> InputFilename{
     llvm::cl::Positional, llvm::cl::desc{"<input mua file>"},
     llvm::cl::init("-"), llvm::cl::value_desc{"filename"}};
 
+static llvm::cl::opt<int>
+    OptimizationLevel("O", llvm::cl::desc{"Set the optimization level (0-3)"},
+                      llvm::cl::Prefix, llvm::cl::init(0),
+                      llvm::cl::value_desc{"N"});
+
 namespace {
 enum class Action { None, EmitAST, EmitSema, EmitLLVM, EmitObj };
 } // namespace
@@ -50,6 +55,19 @@ static llvm::cl::opt<enum Action> EmitAction(
                                 "Emit the LLVM IR module")),
     llvm::cl::values(clEnumValN(Action::EmitObj, "obj",
                                 "Emit the object code")));
+
+static mua::codegen::OptimizationLevel ToCodeGenOptLevel(int n) {
+  switch (n) {
+  case 1:
+    return mua::codegen::OptimizationLevel::O1;
+  case 2:
+    return mua::codegen::OptimizationLevel::O2;
+  case 3:
+    return mua::codegen::OptimizationLevel::O3;
+  default:
+    return mua::codegen::OptimizationLevel::O0;
+  }
+}
 
 int main(int argc, char *argv[]) {
   llvm::InitLLVM initLLVM{argc, argv};
@@ -92,8 +110,9 @@ int main(int argc, char *argv[]) {
 
   if (EmitAction == Action::EmitObj) {
     std::string outputPath{llvm::formatv("{0}.o", InputFilename)};
-    bool success{mua::codegen::EmitObjectFile(*theIRUnit.Module, outputPath,
-                                              llvm::errs())};
+    bool success{mua::codegen::EmitObjectFile(
+        *theIRUnit.Module, ToCodeGenOptLevel(OptimizationLevel), outputPath,
+        llvm::errs())};
     return success ? 0 : 5;
   }
 
