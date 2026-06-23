@@ -76,6 +76,11 @@ bool mua::codegen::EmitObjectFile(llvm::Module &mod, OptimizationLevel optLevel,
       target->createTargetMachine(targetTriple, /*CPU=*/"generic",
                                   /*Features=*/"", targetOptions,
                                   llvm::Reloc::PIC_)};
+  if (!targetMachine) {
+    os << "error: could not create target machine for target '"
+       << targetTriple.str() << "'\n";
+    return false;
+  }
 
   // Set the data layout
   mod.setDataLayout(targetMachine->createDataLayout());
